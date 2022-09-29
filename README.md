@@ -1,0 +1,1 @@
+User guide will be here soon. See the CONTRIBUTING.md guide for instructions on developing the client.
