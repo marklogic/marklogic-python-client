@@ -2,3 +2,12 @@ plugins {
     id 'net.saliman.properties' version '1.5.2'
     id 'com.marklogic.ml-gradle' version '4.5.2'
 }
+
+// Generate a temporary certificate for some simple SSL tests
+ext {
+    def command = new com.marklogic.appdeployer.command.security.GenerateTemporaryCertificateCommand()
+    command.setTemplateIdOrName("python-test-ssl-template")
+    command.setCommonName("localhost")
+    command.setValidFor(365)
+    mlAppDeployer.commands.add(command)
+}

@@ -1,0 +1,16 @@
+{
+    "server-name" : "%%NAME%%-ssl",
+    "group-name" : "Default",
+    "server-type" : "http",
+    "enabled" : true,
+    "root" : "/",
+    "port" : 8031,
+    "authentication" : "digestbasic",
+    "content-database" : "%%DATABASE%%",
+    "modules-database" : "%%MODULES_DATABASE%%",
+    "ssl-certificate-template": "python-test-ssl-template",
+    "url-rewriter": "/MarkLogic/rest-api/rewriter.xml",
+    "error-handler": "/MarkLogic/rest-api/error-handler.xqy",
+    "rewrite-resolves-globally": true
+  }
+  

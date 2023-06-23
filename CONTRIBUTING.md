@@ -17,3 +17,11 @@ To run the tests:
 - Run `./gradlew -i mlDeploy`
 - `cd ..`
 - Run `pytest`
+
+To run an individual test with logging to stdout:
+
+    pytest -s tests/test_search.py
+
+To run an individual test method:
+
+    pytest -s test/test_search.py::test_search
