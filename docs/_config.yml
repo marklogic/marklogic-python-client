@@ -1,0 +1,18 @@
+title: MarkLogic Python Client
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+repository: marklogic/marklogic-python-client
+
+heading_anchors: true
+
+# Aux links for the upper right navigation
+aux_links:
+  "marklogic/marklogic-python-client":
+    - "https://github.com/marklogic/marklogic-python-client"
+
+# Makes Aux links open in a new tab. Default is false
+aux_links_new_tab: false
+
+enable_copy_code_button: true
