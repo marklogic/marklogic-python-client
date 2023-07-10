@@ -31,6 +31,25 @@ To run an individual test method:
 
     pytest -s test/test_search.py::test_search
 
+## Testing the client in a Python shell
+
+After running `poetry install` as described above, you can start a Python shell and manually test the client. You will 
+need to launch the shell in the same Python virtual environment as the one in which you ran `poetry install`. After 
+ensuring you've done that, start a new Python shell by running `python`. 
+
+You can then import the client via:
+
+    from marklogic.client import Client
+
+You can instantiate an instance of the client that communicates with this project's test application via:
+
+    client = Client("http://localhost:8030", digest=("python-test-user", "password"))
+
+And you can then start sending requests with the client - for example:
+
+    r = client.get("/v1/search?format=json&pageLength=2")
+    r.json()
+
 ## Testing the documentation locally
 
 The docs for this project are stored in the `./docs` directory as a set of Markdown files. These are published via
