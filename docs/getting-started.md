@@ -53,6 +53,21 @@ example, just like with `requests`, a tuple can be passed to the `auth` argument
     from marklogic.client import Client
     client = Client('http://localhost:8030', auth=('username', 'password'))
 
+### MarkLogic Cloud Authentication
+
+When connecting to a [MarkLogic Cloud instance](https://developer.marklogic.com/products/cloud/), you will need to set 
+the `cloud_api_key` and `base_path` arguments. You only need to specify a `host` as well, as port 443 and HTTPS will be
+used by default. For example:
+
+    from marklogic.client import Client
+    client = Client(host='example.marklogic.cloud', cloud_api_key='some-key-value', base_path='/ml/example/manage')
+
+You may still use a full base URL if you wish:
+
+    from marklogic.client import Client
+    client = Client('https://example.marklogic.cloud', cloud_api_key='some-key-value', base_path='/ml/example/manage')
+
+ 
 ## SSL 
 
 Configuring SSL connections is the same as 
