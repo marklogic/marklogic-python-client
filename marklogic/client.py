@@ -18,6 +18,7 @@ class Client(requests.Session):
         username: str = None,
         password: str = None,
         cloud_api_key: str = None,
+        cloud_token_duration: int = 0,
     ):
         super(Client, self).__init__()
         self.verify = verify
@@ -35,7 +36,9 @@ class Client(requests.Session):
         elif digest:
             self.auth = HTTPDigestAuth(digest[0], digest[1])
         elif cloud_api_key:
-            self.auth = MarkLogicCloudAuth(self.base_url, cloud_api_key, self.verify)
+            self.auth = MarkLogicCloudAuth(
+                self, self.base_url, cloud_api_key, cloud_token_duration
+            )
         else:
             self.auth = HTTPDigestAuth(username, password)
 

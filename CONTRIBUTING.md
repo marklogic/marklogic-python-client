@@ -39,7 +39,7 @@ ensuring you've done that, start a new Python shell by running `python`.
 
 You can then import the client via:
 
-    from marklogic.client import Client
+    from marklogic import Client
 
 You can instantiate an instance of the client that communicates with this project's test application via:
 
