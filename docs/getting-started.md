@@ -19,12 +19,12 @@ as you'd use either the `Session` class or the `requests` API.
 
 A `Client` instance can be constructed either by providing a base URL for all requests along with authentication:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client('http://localhost:8030', digest=('username', 'password'))
 
 Or via separate arguments for each of the parts of a base URL:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client(host='localhost', port='8030', digest=('username', 'password'))
 
 After constructing a `Client` instance, each of the methods in the `requests` API for sending an HTTP request can be 
@@ -43,14 +43,14 @@ Because the `Client` class extends the `Sessions` class, it can be used as a con
 
 The `Client` constructor includes a `digest` argument as a convenience for using digest authentication:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client('http://localhost:8030', digest=('username', 'password'))
 
 An `auth` argument is also available for using any authentication strategy that can be configured
 [via the requests `auth` argument](https://requests.readthedocs.io/en/latest/user/advanced/#custom-authentication). For 
 example, just like with `requests`, a tuple can be passed to the `auth` argument to use basic authentication:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client('http://localhost:8030', auth=('username', 'password'))
 
 ### MarkLogic Cloud Authentication
@@ -59,15 +59,24 @@ When connecting to a [MarkLogic Cloud instance](https://developer.marklogic.com/
 the `cloud_api_key` and `base_path` arguments. You only need to specify a `host` as well, as port 443 and HTTPS will be
 used by default. For example:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client(host='example.marklogic.cloud', cloud_api_key='some-key-value', base_path='/ml/example/manage')
 
 You may still use a full base URL if you wish:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client('https://example.marklogic.cloud', cloud_api_key='some-key-value', base_path='/ml/example/manage')
 
- 
+MarkLogic Cloud uses an access token for authentication; the access token is generated using the API key value. In some 
+scenarios, you may wish to set the token expiration time to a value other than the default used by MarkLogic Cloud. To 
+do so, set the `cloud_token_duration` argument to a number greater than zero that defines the token duration in 
+minutes:
+
+    from marklogic import Client
+    # Sets a token duration of 10 minutes.
+    client = Client(host='example.marklogic.cloud', cloud_api_key='some-key-value', base_path='/ml/example/manage', 
+        cloud_token_duration=10)
+
 ## SSL 
 
 Configuring SSL connections is the same as 
@@ -75,10 +84,10 @@ Configuring SSL connections is the same as
 As a convience, the `Client` constructor includes a `verify` argument so that it does not need to be configured on the 
 `Client` instance after it's been constructed nor on every request:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client('https://localhost:8030', digest=('username', 'password'), verify='/path/to/cert.pem')
 
 When specifying the base URL via separate arguments, the `scheme` argument can be set for HTTPS connections:
 
-    from marklogic.client import Client
+    from marklogic import Client
     client = Client(host='localhost', port='8030', scheme='https', digest=('username', 'password'), verify=False)

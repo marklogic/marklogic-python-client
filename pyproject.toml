@@ -22,3 +22,8 @@ black = "^23.3.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+# Enables live logging; see https://docs.pytest.org/en/latest/how-to/logging.html#live-logs 
+log_cli = 1
+log_cli_level = "DEBUG"

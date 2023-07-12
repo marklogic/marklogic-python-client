@@ -1,6 +1,8 @@
+import logging
 import pytest
+import time
 
-from marklogic.client import Client
+from marklogic import Client
 
 """
 This module is intended for manual testing where the cloud_config fixture
@@ -63,6 +65,29 @@ def test_invalid_api_key(cloud_config):
         'Unable to generate token; status code: 401; cause: {"statusCode":401,"errorMessage":"API Key is not valid."}'
         == str(err.value)
     )
+
+
+@pytest.mark.skip(
+    "Skipped since it takes over a minute to run; comment this out to run it."
+)
+def test_renew_token(cloud_config):
+    if cloud_config["key"] == "changeme":
+        return
+
+    client = Client(
+        host=cloud_config["host"],
+        cloud_api_key=cloud_config["key"],
+        cloud_token_duration=1,
+        base_path=DEFAULT_BASE_PATH,
+    )
+
+    _verify_client_works(client)
+
+    logging.info("Sleeping to ensure the token will have expired on the next call")
+    time.sleep(61)
+
+    # First call should fail, resulting in a new token being generated.
+    _verify_client_works(client)
 
 
 def _new_client(cloud_config, base_path: str) -> Client:

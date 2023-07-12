@@ -1,5 +1,5 @@
 import pytest
-from marklogic.client import Client
+from marklogic import Client
 
 
 @pytest.fixture
