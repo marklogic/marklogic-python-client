@@ -2,9 +2,7 @@
     "user-name": "python-test-user",
     "password": "password",
     "role": [
-        "rest-evaluator",
-        "rest-reader",
-        "rest-writer",
+        "python-tester",
         "qconsole-user"
     ]
 }
