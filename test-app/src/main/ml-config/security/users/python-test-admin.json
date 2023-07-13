@@ -1,0 +1,7 @@
+{
+    "user-name": "python-test-admin",
+    "password": "password",
+    "role": [
+        "admin"
+    ]
+}

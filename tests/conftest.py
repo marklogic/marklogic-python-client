@@ -8,6 +8,11 @@ def client():
 
 
 @pytest.fixture
+def admin_client():
+    return Client("http://localhost:8030", digest=("python-test-admin", "password"))
+
+
+@pytest.fixture
 def basic_client():
     # requests allows a tuple to be passed when doing basic authentication.
     return Client("http://localhost:8030", auth=("python-test-user", "password"))

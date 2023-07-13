@@ -1,5 +1,6 @@
 import requests
 from marklogic.cloud_auth import MarkLogicCloudAuth
+from marklogic.documents import DocumentManager
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -63,3 +64,9 @@ class Client(requests.Session):
         """
         request.url = urljoin(self.base_url, request.url)
         return super(Client, self).prepare_request(request, *args, **kwargs)
+
+    @property
+    def documents(self):
+        if not hasattr(self, "_documents"):
+            self._documents = DocumentManager(self)
+        return self._documents

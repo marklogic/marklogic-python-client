@@ -1,0 +1,23 @@
+{
+    "role-name": "python-tester",
+    "role": [
+        "rest-extension-user"
+    ],
+    "privilege": [
+        {
+            "privilege-name": "rest-reader",
+            "action": "http://marklogic.com/xdmp/privileges/rest-reader",
+            "kind": "execute"
+        },
+        {
+            "privilege-name": "rest-writer",
+            "action": "http://marklogic.com/xdmp/privileges/rest-writer",
+            "kind": "execute"
+        },
+        {
+            "privilege-name": "xdbc:eval",
+            "action": "http://marklogic.com/xdmp/privileges/xdbc-eval",
+            "kind": "execute"
+        }
+    ]
+}
