@@ -15,7 +15,9 @@ Before running any tests, first deploy the test application:
 
 - Use Java 8 or higher
 - `cd test-app`
-- Verify that the host/port/username/admin in `gradle.properties` work for your ML install
+- Create a file named `gradle-local.properties` and add `mlPassword=` to it, with the value of the property being
+your admin user's password.
+- Verify that the host/port/username in `gradle.properties` work for your MarkLogic installation.
 - Run `./gradlew -i mlDeploy`
 - `cd ..`
 
@@ -23,13 +25,17 @@ Then run all the tests:
 
     pytest 
 
-To run an individual test with logging to stdout:
+To run an individual test:
 
-    pytest -s tests/test_search.py
+    pytest tests/test_search.py
 
 To run an individual test method:
 
-    pytest -s test/test_search.py::test_search
+    pytest test/test_search.py::test_search
+
+Note that due to the pytest config in the `pyproject.toml` file, all 
+[Python logging](https://docs.python.org/3/howto/logging.html) should appear immediately
+as tests are executed.
 
 ## Testing the client in a Python shell
 
