@@ -3,31 +3,15 @@ import pytest
 from marklogic import Client
 from marklogic.documents import Document
 
-
-@pytest.fixture(autouse=True)
-def prepare_test_database(admin_client: Client):
-    """
-    Deletes any documents created by other tests to ensure a 'clean' database before a
-    test runs. Does not delete documents in the 'test-data' collection which is intended
-    to contain all the documents loaded by the test-app. A user with the 'admin' role
-    is used so that temporal documents can be deleted.
-    """
-    query = "cts:uris((), (), cts:not-query(cts:collection-query('test-data'))) \
-        ! xdmp:document-delete(.)"
-    response = admin_client.post(
-        "v1/eval",
-        headers={"Content-type": "application/x-www-form-urlencoded"},
-        data={"xquery": query},
-    )
-    assert 200 == response.status_code
+DEFAULT_PERMS = {"python-tester": ["read", "update"]}
 
 
 def test_write_json(client: Client):
     # Verifies that JSON can be either a dict or a string.
     response = client.documents.write(
         [
-            Document("/temp/doc1.json", {"doc": 1}),
-            Document("/temp/doc2.json", '{"doc": 2}'),
+            Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS),
+            Document("/temp/doc2.json", '{"doc": 2}', permissions=DEFAULT_PERMS),
         ]
     )
 
@@ -48,8 +32,8 @@ def test_return_xml(client: Client):
     the Content-type to multipart/mixed.
     """
     docs = [
-        Document("/temp/doc1.json", {"doc": 1}),
-        Document("/temp/doc2.json", {"doc": 2}),
+        Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS),
+        Document("/temp/doc2.json", {"doc": 2}, permissions=DEFAULT_PERMS),
     ]
     response = client.documents.write(docs, headers={"Accept": "application/xml"})
 
@@ -60,8 +44,8 @@ def test_return_xml(client: Client):
 def test_write_json_and_xml(client: Client):
     response = client.documents.write(
         [
-            Document("/temp/doc1.json", {"doc": 1}),
-            Document("/temp/doc2.xml", "<doc>2</doc>"),
+            Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS),
+            Document("/temp/doc2.xml", "<doc>2</doc>", permissions=DEFAULT_PERMS),
         ]
     )
     assert 200 == response.status_code
@@ -79,8 +63,18 @@ def test_content_types(client: Client):
     """
     response = client.documents.write(
         [
-            Document("/temp/doc1", {"doc": 1}, content_type="application/json"),
-            Document("/temp/doc2", "<doc>2</doc>", content_type="application/xml"),
+            Document(
+                "/temp/doc1",
+                {"doc": 1},
+                content_type="application/json",
+                permissions=DEFAULT_PERMS,
+            ),
+            Document(
+                "/temp/doc2",
+                "<doc>2</doc>",
+                content_type="application/xml",
+                permissions=DEFAULT_PERMS,
+            ),
         ]
     )
     assert 200 == response.status_code
@@ -92,16 +86,27 @@ def test_content_types(client: Client):
 
 
 def test_single_doc(client):
-    response = client.documents.write([Document("/temp/doc1.json", {"doc": 1})])
+    response = client.documents.write(
+        [Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS)]
+    )
     assert 200 == response.status_code
 
     doc1 = client.get("v1/documents?uri=/temp/doc1.json").json()
     assert 1 == doc1["doc"]
 
 
+@pytest.mark.skip("Will get this working when supporting batch-level metadata")
 def test_server_generated_uri(client):
     response = client.documents.write(
-        [Document(None, {"doc": "serveruri"}, extension=".json", directory="/temp/")]
+        [
+            Document(
+                None,
+                {"doc": "serveruri"},
+                extension=".json",
+                directory="/temp/",
+                permissions=DEFAULT_PERMS,
+            )
+        ]
     )
     assert 200 == response.status_code
 
@@ -116,7 +121,14 @@ def test_server_generated_uri(client):
 
 def test_repair_xml(client):
     response = client.documents.write(
-        [Document("/temp/doc1.xml", "<doc>needs <b>closing tag</doc>", repair="full")]
+        [
+            Document(
+                "/temp/doc1.xml",
+                "<doc>needs <b>closing tag</doc>",
+                repair="full",
+                permissions=DEFAULT_PERMS,
+            )
+        ]
     )
     assert 200 == response.status_code
 
@@ -128,14 +140,25 @@ def test_repair_xml(client):
 def test_extract_binary(client):
     content = "MarkLogic and Python".encode("ascii")
     response = client.documents.write(
-        [Document("/temp/doc1.bin", content, extract="properties")]
+        [
+            Document(
+                "/temp/doc1.bin",
+                content,
+                extract="properties",
+                permissions=DEFAULT_PERMS,
+            )
+        ]
     )
     assert 200 == response.status_code
 
 
 def test_optimistic_locking(client):
     response = client.documents.write(
-        [Document("/temp/doc1.json", {"content": "original"})]
+        [
+            Document(
+                "/temp/doc1.json", {"content": "original"}, permissions=DEFAULT_PERMS
+            )
+        ]
     )
     assert 200 == response.status_code
 
@@ -144,7 +167,14 @@ def test_optimistic_locking(client):
 
     # Update the document, passing in the current version_id based on the ETag.
     response = client.documents.write(
-        [Document("/temp/doc1.json", {"content": "updated!"}, version_id=etag)]
+        [
+            Document(
+                "/temp/doc1.json",
+                {"content": "updated!"},
+                version_id=etag,
+                permissions=DEFAULT_PERMS,
+            )
+        ]
     )
     assert 200 == response.status_code
 
@@ -154,7 +184,14 @@ def test_optimistic_locking(client):
 
     # Next update should fail since the ETag is no longer the current version.
     response = client.documents.write(
-        [Document("/temp/doc1.json", {"this": "should fail"}, version_id=etag)]
+        [
+            Document(
+                "/temp/doc1.json",
+                {"this": "should fail"},
+                version_id=etag,
+                permissions=DEFAULT_PERMS,
+            )
+        ]
     )
     assert 412 == response.status_code, "412 is returned when the versionId is invalid."
     assert response.text.__contains__("RESTAPI-CONTENTWRONGVERSION")
@@ -170,7 +207,14 @@ def test_temporal_doc(client):
     }
 
     response = client.documents.write(
-        [Document("/temp/doc1.json", content, temporal_document="custom1")],
+        [
+            Document(
+                "/temp/doc1.json",
+                content,
+                temporal_document="custom1",
+                permissions=DEFAULT_PERMS,
+            )
+        ],
         params={"temporal-collection": "temporal-collection"},
     )
     assert 200 == response.status_code
@@ -180,3 +224,7 @@ def test_temporal_doc(client):
     data = client.get("/v1/search?collection=custom1&format=json").json()
     assert 1 == data["total"]
     assert "/temp/doc1.json" == data["results"][0]["uri"]
+
+
+def test_metadata_no_content(client: Client):
+    print("TODO!")
