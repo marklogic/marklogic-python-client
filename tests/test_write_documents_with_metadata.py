@@ -29,8 +29,11 @@ def test_all_metadata(client: Client):
     )
     assert 200 == response.status_code
 
-    metadata = _get_metadata(client, "/temp/doc1.json")
-    _verify_test_metadata_exists(metadata)
+    docs = client.documents.read(
+        ["/temp/doc1.json"], categories=["content", "metadata"]
+    )
+
+    _verify_test_metadata_exists(docs[0])
 
 
 def test_only_quality_and_permissions(client: Client):
@@ -50,11 +53,13 @@ def test_only_quality_and_permissions(client: Client):
 
     assert 200 == response.status_code
 
-    metadata = _get_metadata(client, "/temp/doc1.json")
-    assert 2 == metadata["quality"]
-    assert 0 == len(metadata["collections"])
-    assert 0 == len(metadata["properties"].keys())
-    assert 0 == len(metadata["metadataValues"].keys())
+    doc = client.documents.read(
+        ["/temp/doc1.json"], categories=["content", "metadata"]
+    )[0]
+    assert 2 == doc.quality
+    assert 0 == len(doc.collections)
+    assert 0 == len(doc.properties.keys())
+    assert 0 == len(doc.metadata_values.keys())
 
 
 def test_only_quality(client: Client):
@@ -88,7 +93,7 @@ def test_default_metadata(client: Client):
             Document(
                 "/temp/doc2.json",
                 {"doc": 2},
-                permissions={"python-tester": "update", "rest-extension-user": "read"}
+                permissions={"python-tester": "update", "rest-extension-user": "read"},
             ),
             DefaultMetadata(
                 permissions={"python-tester": "update", "qconsole-user": "read"}
@@ -100,74 +105,75 @@ def test_default_metadata(client: Client):
     assert 200 == response.status_code
 
     # doc1 should use the first set of default metadata
-    metadata = _get_metadata(client, "/temp/doc1.json")
-    _verify_test_metadata_exists(metadata)
+    docs = client.documents.read(
+        ["/temp/doc1.json", "/temp/doc2.json", "/temp/doc3.json"],
+        categories=["content", "metadata"],
+    )
 
-    # doc2 should use its own metadata
-    metadata = _get_metadata(client, "/temp/doc2.json")
-    assert 0 == metadata["quality"]
-    assert 0 == len(metadata["collections"])
-    assert 0 == len(metadata["properties"].keys())
-    assert 0 == len(metadata["metadataValues"].keys())
-    perms = metadata["permissions"]
-    assert 2 == len(perms)
-    perm = next(perm for perm in perms if perm["role-name"] == "python-tester")
-    assert 1 == len(perm["capabilities"])
-    assert "update" in perm["capabilities"]
-    perm = next(perm for perm in perms if perm["role-name"] == "rest-extension-user")
-    assert 1 == len(perm["capabilities"])
-    assert "read" in perm["capabilities"]
+    doc1 = next(doc for doc in docs if doc.uri == "/temp/doc1.json")
+    doc2 = next(doc for doc in docs if doc.uri == "/temp/doc2.json")
+    doc3 = next(doc for doc in docs if doc.uri == "/temp/doc3.json")
 
-    # doc3 should use the second set of default metadata
-    metadata = _get_metadata(client, "/temp/doc3.json")
-    assert 0 == metadata["quality"]
-    assert 0 == len(metadata["collections"])
-    assert 0 == len(metadata["properties"].keys())
-    assert 0 == len(metadata["metadataValues"].keys())
-    perms = metadata["permissions"]
-    assert 2 == len(perms)
-    perm = next(perm for perm in perms if perm["role-name"] == "python-tester")
-    assert 1 == len(perm["capabilities"])
-    assert "update" in perm["capabilities"]
-    perm = next(perm for perm in perms if perm["role-name"] == "qconsole-user")
-    assert 1 == len(perm["capabilities"])
-    assert "read" in perm["capabilities"]
+    _verify_test_metadata_exists(doc1)
+
+    # Verify doc2 uses its own metadata.
+    assert 0 == doc2.quality
+    assert 0 == len(doc2.collections)
+    assert 0 == len(doc2.properties.keys())
+    assert 0 == len(doc2.metadata_values.keys())
+    perms = doc2.permissions
+    assert 2 == len(perms.keys())
+    capabilities = perms["python-tester"]
+    assert 1 == len(capabilities)
+    assert "update" == capabilities[0]
+    capabilities = perms["rest-extension-user"]
+    assert 1 == len(capabilities)
+    assert "read" == capabilities[0]
+
+    # Verify doc3 uses the second set of default metadata.
+    assert 0 == doc3.quality
+    assert 0 == len(doc3.collections)
+    assert 0 == len(doc3.properties.keys())
+    assert 0 == len(doc3.metadata_values.keys())
+    perms = doc3.permissions
+    assert 2 == len(perms.keys())
+    capabilities = perms["python-tester"]
+    assert 1 == len(capabilities)
+    assert "update" == capabilities[0]
+    capabilities = perms["qconsole-user"]
+    assert 1 == len(capabilities)
+    assert "read" == capabilities[0]
 
 
-
-def _get_metadata(client: Client, uri: str):
-    return client.get(f"v1/documents?uri={uri}&category=metadata&format=json").json()
-
-
-def _verify_test_metadata_exists(metadata: dict):
+def _verify_test_metadata_exists(doc: Document):
     """
     Convenience function for verifying that document metadata contains the metadata
     defined by TEST_METADATA.
     """
-    perms = metadata["permissions"]
-    assert 2 == len(perms)
-    perm = next(perm for perm in perms if perm["role-name"] == "python-tester")
-    assert 2 == len(perm["capabilities"])
-    assert "read" in perm["capabilities"]
-    assert "update" in perm["capabilities"]
-    perm = next(perm for perm in perms if perm["role-name"] == "qconsole-user")
-    assert 1 == len(perm["capabilities"])
-    assert "execute" == perm["capabilities"][0]
+    perms = doc.permissions
+    assert 2 == len(perms.keys())
+    capabilities = perms["python-tester"]
+    assert 2 == len(capabilities)
+    assert "read" in capabilities
+    assert "update" in capabilities
+    capabilities = perms["qconsole-user"]
+    assert 1 == len(capabilities)
+    assert "execute" == capabilities[0]
 
-    collections = metadata["collections"]
+    collections = doc.collections
     assert 2 == len(collections)
     assert "c1" in collections
     assert "c2" in collections
 
-    props = metadata["properties"]
+    props = doc.properties
     assert 3 == len(props.keys())
     assert "world" == props["hello"]
     assert "<can>be embedded</can>" == props["xml"]
     assert 1 == props["number"]
 
-    assert 1 == metadata["quality"]
+    assert 1 == doc.quality
 
-    values = metadata["metadataValues"]
+    values = doc.metadata_values
     assert 2 == len(values.keys())
     assert "value1" == values["key1"]
     assert "value2" == values["key2"]

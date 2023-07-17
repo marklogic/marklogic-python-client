@@ -1,21 +1,29 @@
 import pytest
+
 from marklogic import Client
+
+BASE_URL = "http://localhost:8030"
 
 
 @pytest.fixture
 def client():
-    return Client("http://localhost:8030", digest=("python-test-user", "password"))
+    return Client(BASE_URL, digest=("python-test-user", "password"))
 
 
 @pytest.fixture
 def admin_client():
-    return Client("http://localhost:8030", digest=("python-test-admin", "password"))
+    return Client(BASE_URL, digest=("python-test-admin", "password"))
 
 
 @pytest.fixture
 def basic_client():
     # requests allows a tuple to be passed when doing basic authentication.
-    return Client("http://localhost:8030", auth=("python-test-user", "password"))
+    return Client(BASE_URL, auth=("python-test-user", "password"))
+
+
+@pytest.fixture
+def not_rest_user_client():
+    return Client(BASE_URL, digest=("python-not-rest-user", "password"))
 
 
 @pytest.fixture

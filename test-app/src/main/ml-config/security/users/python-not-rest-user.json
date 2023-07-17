@@ -1,0 +1,8 @@
+{
+    "user-name": "python-not-rest-user",
+    "description": "For tests where the user does not have the privileges required by the REST API.",
+    "password": "password",
+    "role": [
+        "qconsole-user"
+    ]
+}
