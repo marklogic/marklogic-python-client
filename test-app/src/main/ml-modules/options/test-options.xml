@@ -1,0 +1,7 @@
+<options xmlns="http://marklogic.com/appservices/search">
+    <constraint name="hello">
+        <value>
+            <element ns="" name="hello"/>
+        </value>
+    </constraint>
+</options>
