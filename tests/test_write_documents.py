@@ -20,10 +20,17 @@ def test_write_json(client: Client):
     data = response.json()
     assert len(data["documents"]) == 2
 
-    doc1 = client.get("v1/documents?uri=/temp/doc1.json").json()
-    assert 1 == doc1["doc"]
-    doc2 = client.get("v1/documents?uri=/temp/doc2.json").json()
-    assert 2 == doc2["doc"]
+    docs = client.documents.read(["/temp/doc1.json", "/temp/doc2.json"])
+
+    doc1 = next(doc for doc in docs if doc.uri == "/temp/doc1.json")
+    assert "application/json" == doc1.content_type
+    assert doc1.version_id is not None
+    assert {"doc": 1} == doc1.content
+
+    doc2 = next(doc for doc in docs if doc.uri == "/temp/doc2.json")
+    assert "application/json" == doc2.content_type
+    assert doc2.version_id is not None
+    assert {"doc": 2} == doc2.content
 
 
 def test_return_xml(client: Client):
@@ -221,9 +228,11 @@ def test_temporal_doc(client):
 
     # Verify that the temporal doc was written to the "custom1" collection. This will be
     # easier to do once we have support for reading documents and their metadata.
-    data = client.get("/v1/search?collection=custom1&format=json").json()
-    assert 1 == data["total"]
-    assert "/temp/doc1.json" == data["results"][0]["uri"]
+    doc = client.documents.read("/temp/doc1.json", categories=["collections"])[0]
+    assert len(doc.collections) == 3
+    assert "custom1" in doc.collections
+    assert "latest" in doc.collections
+    assert "temporal-collection" in doc.collections
 
 
 def test_metadata_no_content(client: Client):
