@@ -267,10 +267,56 @@ def _extract_values_from_header(part) -> dict:
     }
 
 
+def multipart_response_to_documents(response: Response) -> list[Document]:
+    """
+    Returns a list of Documents, one for each URI found in the various parts in the
+    given multipart response. The response is assumed to correspond to the structure
+    defined by https://docs.marklogic.com/REST/GET/v1/documents when the Accept header
+    is "multipart/mixed".
+    """
+    decoder = MultipartDecoder.from_response(response)
+
+    uris_to_documents = OrderedDict()
+
+    for part in decoder.parts:
+        header_values = _extract_values_from_header(part)
+        uri = header_values["uri"]
+        if header_values["category"] == "content":
+            content = (
+                json.loads(part.content)
+                if header_values["content_type"] == "application/json"
+                else part.content
+            )
+            content_type = header_values["content_type"]
+            version_id = header_values["version_id"]
+            if uris_to_documents.get(uri):
+                doc: Document = uris_to_documents[uri]
+                doc.content = content
+                doc.content_type = content_type
+                doc.version_id = version_id
+            else:
+                uris_to_documents[uri] = Document(
+                    uri, content, content_type=content_type, version_id=version_id
+                )
+        else:
+            doc = (
+                uris_to_documents[uri]
+                if uris_to_documents.get(uri)
+                else Document(uri, None)
+            )
+            uris_to_documents[uri] = doc
+            dict_to_metadata(json.loads(part.content), doc)
+
+    return list(uris_to_documents.values())
+
+
 class DocumentManager:
     """
-    Provides methods to simplify interacting with the /v1/documents REST endpoint
-    defined at https://docs.marklogic.com/REST/client/management.
+    Provides methods to simplify interacting with REST endpoints that either accept
+    or return documents. Primarily involves endpoints defined at
+    https://docs.marklogic.com/REST/client/management , but also includes support for
+    the search endpoint at https://docs.marklogic.com/REST/POST/v1/search which can
+    return documents as well.
     """
 
     def __init__(self, session: Session):
@@ -311,24 +357,6 @@ class DocumentManager:
 
         return self._session.post("/v1/documents", data=data, headers=headers, **kwargs)
 
-    def _get_multipart_documents_response(
-        self, uris: list[str], categories: list[str], **kwargs
-    ) -> Response:
-        """
-        Constructs and sends a multipart/mixed request to the v1/documents endpoint.
-        """
-        params = kwargs.pop("params", {})
-        params["uri"] = uris
-        params["format"] = "json"  # This refers to the metadata format.
-        if categories:
-            params["category"] = categories
-
-        headers = kwargs.pop("headers", {})
-        headers["Accept"] = "multipart/mixed"
-        return self._session.get(
-            "/v1/documents", params=params, headers=headers, **kwargs
-        )
-
     def read(
         self, uris: list[str], categories: list[str] = None, **kwargs
     ) -> Union[list[Document], Response]:
@@ -342,42 +370,100 @@ class DocumentManager:
         URI. By default, only content will be returned for each URI. See the endpoint
         documentation for further information.
         """
-        response = self._get_multipart_documents_response(uris, categories, **kwargs)
-        if response.status_code != 200:
-            return response
+        params = kwargs.pop("params", {})
+        params["uri"] = uris
+        params["format"] = "json"  # This refers to the metadata format.
+        if categories:
+            params["category"] = categories
 
-        decoder = MultipartDecoder.from_response(response)
+        headers = kwargs.pop("headers", {})
+        headers["Accept"] = "multipart/mixed"
+        response = self._session.get(
+            "/v1/documents", params=params, headers=headers, **kwargs
+        )
 
-        # Use a dict to store URIs to Document objects so that we don't assume any
-        # order with how the metadata and content parts are returned. An OrderedDict is
-        # used to ensure that the order of the URIs is maintained, though the REST
-        # endpoint is not guaranteed to return them in the same order as provided by
-        # the user.
-        docs = OrderedDict()
+        return (
+            multipart_response_to_documents(response)
+            if response.status_code == 200
+            else response
+        )
 
-        for part in decoder.parts:
-            header_values = _extract_values_from_header(part)
-            uri = header_values["uri"]
-            if header_values["category"] == "content":
-                content = (
-                    json.loads(part.content)
-                    if header_values["content_type"] == "application/json"
-                    else part.content
-                )
-                content_type = header_values["content_type"]
-                version_id = header_values["version_id"]
-                if docs.get(uri):
-                    doc: Document = docs[uri]
-                    doc.content = content
-                    doc.content_type = content_type
-                    doc.version_id = version_id
-                else:
-                    docs[uri] = Document(
-                        uri, content, content_type=content_type, version_id=version_id
-                    )
+    def search(
+        self,
+        query: Union[dict, str] = None,
+        categories: list[str] = None,
+        q: str = None,
+        start: int = None,
+        page_length: int = None,
+        options: str = None,
+        collections: list[str] = None,
+        **kwargs,
+    ) -> Union[list[Document], Response]:
+        """
+        Leverages the support in the search endpoint defined at
+        https://docs.marklogic.com/REST/POST/v1/search for returning a list of
+        documents instead of a search response. Parameters that are commonly used for
+        that endpoint are included as arguments to this method for ease of use.
+
+        :param query: JSON or XML query matching one of the types supported by the 
+        search endpoint. The "Content-type" header will be set based on whether this 
+        is a dict, a string of JSON, or a string of XML.
+        :param categories: optional list of the categories of data to return for each
+        URI. By default, only content will be returned for each URI. See the endpoint
+        documentation for further information.
+        :param q: optional search string.
+        :param start: index of the first result to return.
+        :param page_length: maximum number of documents to return.
+        :param options: name of a query options instance to use.
+        :param collections: restrict results to documents in these collections.
+        """
+        params = kwargs.pop("params", {})
+        params["format"] = "json"  # This refers to the metadata format.
+        if categories:
+            params["category"] = categories
+        if collections:
+            params["collection"] = collections
+        if q:
+            params["q"] = q
+        if start:
+            params["start"] = start
+        if page_length:
+            params["pageLength"] = page_length
+        if options:
+            params["options"] = options
+
+        headers = kwargs.pop("headers", {})
+        headers["Accept"] = "multipart/mixed"
+        data = None
+
+        if query:
+            if isinstance(query, dict):
+                data = json.dumps(query)
+                headers["Content-type"] = "application/json"
             else:
-                doc = docs[uri] if docs.get(uri) else Document(uri, None)
-                docs[uri] = doc
-                dict_to_metadata(json.loads(part.content), doc)
+                data = query
+                try:
+                    json.loads(query)
+                except Exception:
+                    headers["Content-type"] = "application/xml"
+                else:
+                    headers["Content-type"] = "application/json"
 
-        return list(docs.values())
+        if data:
+            response = self._session.post(
+                "/v1/search",
+                headers=headers,
+                params=params,
+                data=data,
+                **kwargs,
+            )
+        else:
+            response = self._session.post(
+                "/v1/search", headers=headers, params=params, **kwargs
+            )
+
+        return (
+            multipart_response_to_documents(response)
+            if response.status_code == 200
+            else response
+        )
