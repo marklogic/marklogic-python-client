@@ -92,8 +92,8 @@ class Document(Metadata):
 
     def __init__(
         self,
-        uri: str,
-        content,
+        uri: str = None,
+        content=None,
         collections: list[str] = None,
         permissions: dict = None,
         quality: int = None,
@@ -148,6 +148,8 @@ class Document(Metadata):
         """
         Returns a multipart request field representing the document to be written.
         """
+        if self.content is None:
+            return None
         data = self.content
         if type(data) is dict:
             data = json.dumps(data)
@@ -282,13 +284,14 @@ def multipart_response_to_documents(response: Response) -> list[Document]:
         header_values = _extract_values_from_header(part)
         uri = header_values["uri"]
         if header_values["category"] == "content":
-            content = (
-                json.loads(part.content)
-                if header_values["content_type"] == "application/json"
-                else part.content
-            )
-            content_type = header_values["content_type"]
-            version_id = header_values["version_id"]
+            content = part.content
+            content_type = header_values.get("content_type")
+            if content_type == "application/json":
+                content = json.loads(content)
+            elif content_type in ["application/xml", "text/xml", "text/plain"]:
+                content = content.decode(part.encoding)
+
+            version_id = header_values.get("version_id")
             if uris_to_documents.get(uri):
                 doc: Document = uris_to_documents[uri]
                 doc.content = content
@@ -323,7 +326,7 @@ class DocumentManager:
         self._session = session
 
     def write(
-        self, parts: list[Union[DefaultMetadata, Document]], **kwargs
+        self, parts: Union[Document, list[Union[DefaultMetadata, Document]]], **kwargs
     ) -> Response:
         """
         Write one or many documents at a time via a POST to the endpoint defined at
@@ -337,6 +340,9 @@ class DocumentManager:
         """
         fields = []
 
+        if isinstance(parts, Document):
+            parts = [parts]
+
         for part in parts:
             if isinstance(part, DefaultMetadata):
                 fields.append(part.to_metadata_request_field())
@@ -344,7 +350,9 @@ class DocumentManager:
                 metadata_field = part.to_metadata_request_field()
                 if metadata_field:
                     fields.append(metadata_field)
-                fields.append(part.to_request_field())
+                content_field = part.to_request_field()
+                if content_field:
+                    fields.append(content_field)
 
         data, content_type = encode_multipart_formdata(fields)
 
@@ -358,20 +366,20 @@ class DocumentManager:
         return self._session.post("/v1/documents", data=data, headers=headers, **kwargs)
 
     def read(
-        self, uris: list[str], categories: list[str] = None, **kwargs
+        self, uris: Union[str, list[str]], categories: list[str] = None, **kwargs
     ) -> Union[list[Document], Response]:
         """
         Read one or many documents via a GET to the endpoint defined at
         https://docs.marklogic.com/REST/POST/v1/documents . If a 200 is not returned
         by that endpoint, then the Response is returned instead.
 
-        :param uris: list of URIs to read.
+        :param uris: list of URIs or a single URI to read.
         :param categories: optional list of the categories of data to return for each
         URI. By default, only content will be returned for each URI. See the endpoint
         documentation for further information.
         """
         params = kwargs.pop("params", {})
-        params["uri"] = uris
+        params["uri"] = uris if isinstance(uris, list) else [uris]
         params["format"] = "json"  # This refers to the metadata format.
         if categories:
             params["category"] = categories
@@ -405,8 +413,8 @@ class DocumentManager:
         documents instead of a search response. Parameters that are commonly used for
         that endpoint are included as arguments to this method for ease of use.
 
-        :param query: JSON or XML query matching one of the types supported by the 
-        search endpoint. The "Content-type" header will be set based on whether this 
+        :param query: JSON or XML query matching one of the types supported by the
+        search endpoint. The "Content-type" header will be set based on whether this
         is a dict, a string of JSON, or a string of XML.
         :param categories: optional list of the categories of data to return for each
         URI. By default, only content will be returned for each URI. See the endpoint
