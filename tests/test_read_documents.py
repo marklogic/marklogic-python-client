@@ -19,12 +19,40 @@ def test_write_and_read_binary(client: Client):
     )
     assert 200 == response.status_code
 
-    docs = client.documents.read(["/temp/doc1.bin"])
+    docs = client.documents.read("/temp/doc1.bin")
     assert len(docs) == 1
     doc = docs[0]
     assert doc.uri == "/temp/doc1.bin"
     content = doc.content.decode("ascii")
     assert content == "MarkLogic and Python"
+
+
+def test_write_and_read_xml_document(client: Client):
+    response = client.documents.write(
+        [Document("/doc1.xml", "<hello>world</hello>", permissions=DEFAULT_PERMS)]
+    )
+    assert response.status_code == 200
+
+    doc = client.documents.read("/doc1.xml")[0]
+    # Verify content was turned into a string
+    assert "<hello>world</hello>" in doc.content
+
+
+def test_write_and_read_text_document(client: Client):
+    response = client.documents.write(
+        [
+            Document(
+                "/doc1.txt",
+                "hello world!",
+                permissions=DEFAULT_PERMS,
+                content_type="text/plain",
+            )
+        ]
+    )
+    assert response.status_code == 200
+
+    doc = client.documents.read("/doc1.txt")[0]
+    assert doc.content == "hello world!"
 
 
 def test_read_uri_with_double_quotes(client: Client):
@@ -34,13 +62,13 @@ def test_read_uri_with_double_quotes(client: Client):
     )
     assert response.status_code == 200
 
-    docs = client.documents.read(["/this/%22works.json"])
+    docs = client.documents.read("/this/%22works.json")
     assert len(docs) == 1
     assert "/this/%22works.json" == docs[0].uri
 
 
 def test_uri_not_found(client: Client):
-    docs = client.documents.read(["/doesnt-exist.json"])
+    docs = client.documents.read("/doesnt-exist.json")
     assert docs is not None
     assert len(docs) == 0
 
@@ -92,7 +120,7 @@ def test_with_accept_header(client: Client):
     expected to be set to multipart/mixed by the client.
     """
     docs = client.documents.read(
-        ["/doc1.json"],
+        "/doc1.json",
         headers={"Accept": "something/invalid"},
         categories=["content", "quality"],
     )
@@ -107,7 +135,7 @@ def test_with_accept_header(client: Client):
 
 def test_read_with_basic_client(basic_client: Client):
     # Just verifies that basic auth works as expected.
-    doc = basic_client.documents.read(["/doc1.json"])[0]
+    doc = basic_client.documents.read("/doc1.json")[0]
     assert {"hello": "world"} == doc.content
 
 
