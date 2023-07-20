@@ -1,7 +1,7 @@
 import pytest
 
 from marklogic import Client
-from marklogic.documents import Document
+from marklogic.documents import DefaultMetadata, Document
 
 DEFAULT_PERMS = {"python-tester": ["read", "update"]}
 
@@ -94,7 +94,7 @@ def test_content_types(client: Client):
 
 def test_single_doc(client):
     response = client.documents.write(
-        [Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS)]
+        Document("/temp/doc1.json", {"doc": 1}, permissions=DEFAULT_PERMS)
     )
     assert 200 == response.status_code
 
@@ -102,40 +102,33 @@ def test_single_doc(client):
     assert 1 == doc1["doc"]
 
 
-@pytest.mark.skip("Will get this working when supporting batch-level metadata")
 def test_server_generated_uri(client):
     response = client.documents.write(
         [
+            DefaultMetadata(permissions=DEFAULT_PERMS),
             Document(
-                None,
-                {"doc": "serveruri"},
-                extension=".json",
-                directory="/temp/",
-                permissions=DEFAULT_PERMS,
-            )
+                content={"doc": "serveruri"}, extension=".json", directory="/temp/"
+            ),
         ]
     )
     assert 200 == response.status_code
 
-    # Do a search to find the URI.
-    data = client.get("/v1/search?q=serveruri&format=json").json()
-    assert 1 == data["total"]
-    uri = data["results"][0]["uri"]
-
-    doc1 = client.get(f"v1/documents?uri={uri}").json()
-    assert "serveruri" == doc1["doc"]
+    # Do a search to verify the document was created.
+    docs = client.documents.search(q="serveruri")
+    assert len(docs) == 1
+    doc = docs[0]
+    assert doc.uri.startswith("/temp/")
+    assert doc.uri.endswith(".json")
 
 
 def test_repair_xml(client):
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.xml",
-                "<doc>needs <b>closing tag</doc>",
-                repair="full",
-                permissions=DEFAULT_PERMS,
-            )
-        ]
+        Document(
+            "/temp/doc1.xml",
+            "<doc>needs <b>closing tag</doc>",
+            repair="full",
+            permissions=DEFAULT_PERMS,
+        )
     )
     assert 200 == response.status_code
 
@@ -147,25 +140,19 @@ def test_repair_xml(client):
 def test_extract_binary(client):
     content = "MarkLogic and Python".encode("ascii")
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.bin",
-                content,
-                extract="properties",
-                permissions=DEFAULT_PERMS,
-            )
-        ]
+        Document(
+            "/temp/doc1.bin",
+            content,
+            extract="properties",
+            permissions=DEFAULT_PERMS,
+        )
     )
     assert 200 == response.status_code
 
 
 def test_optimistic_locking(client):
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json", {"content": "original"}, permissions=DEFAULT_PERMS
-            )
-        ]
+        Document("/temp/doc1.json", {"content": "original"}, permissions=DEFAULT_PERMS)
     )
     assert 200 == response.status_code
 
@@ -174,14 +161,12 @@ def test_optimistic_locking(client):
 
     # Update the document, passing in the current version_id based on the ETag.
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                {"content": "updated!"},
-                version_id=etag,
-                permissions=DEFAULT_PERMS,
-            )
-        ]
+        Document(
+            "/temp/doc1.json",
+            {"content": "updated!"},
+            version_id=etag,
+            permissions=DEFAULT_PERMS,
+        )
     )
     assert 200 == response.status_code
 
@@ -191,14 +176,12 @@ def test_optimistic_locking(client):
 
     # Next update should fail since the ETag is no longer the current version.
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                {"this": "should fail"},
-                version_id=etag,
-                permissions=DEFAULT_PERMS,
-            )
-        ]
+        Document(
+            "/temp/doc1.json",
+            {"this": "should fail"},
+            version_id=etag,
+            permissions=DEFAULT_PERMS,
+        )
     )
     assert 412 == response.status_code, "412 is returned when the versionId is invalid."
     assert response.text.__contains__("RESTAPI-CONTENTWRONGVERSION")
@@ -214,14 +197,12 @@ def test_temporal_doc(client):
     }
 
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                content,
-                temporal_document="custom1",
-                permissions=DEFAULT_PERMS,
-            )
-        ],
+        Document(
+            "/temp/doc1.json",
+            content,
+            temporal_document="custom1",
+            permissions=DEFAULT_PERMS,
+        ),
         params={"temporal-collection": "temporal-collection"},
     )
     assert 200 == response.status_code
@@ -236,4 +217,20 @@ def test_temporal_doc(client):
 
 
 def test_metadata_no_content(client: Client):
-    print("TODO!")
+    uri = "/temp/doc1.json"
+    response = client.documents.write(
+        Document(uri, {"doc": 1}, permissions=DEFAULT_PERMS),
+    )
+    assert response.status_code == 200
+
+    doc = client.documents.read(uri, categories=["metadata"])[0]
+    # Collections is not None since MarkLogic returns [] for it.
+    assert len(doc.collections) == 0
+
+    response = client.documents.write(Document(uri, collections=["c1", "c2"]))
+    assert response.status_code == 200
+
+    doc = client.documents.read(uri, categories=["metadata"])[0]
+    assert "c1" in doc.collections
+    assert "c2" in doc.collections
+    assert len(doc.collections) == 2

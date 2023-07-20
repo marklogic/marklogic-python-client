@@ -1,5 +1,5 @@
 from marklogic import Client
-from marklogic.documents import Document, DefaultMetadata
+from marklogic.documents import DefaultMetadata, Document
 
 TEST_METADATA = {
     "collections": ["c1", "c2"],
@@ -19,43 +19,37 @@ TEST_METADATA = {
 
 def test_all_metadata(client: Client):
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                {"content": "original"},
-                *TEST_METADATA.values(),
-            ),
-        ]
+        Document(
+            "/temp/doc1.json",
+            {"content": "original"},
+            *TEST_METADATA.values(),
+        ),
     )
     assert 200 == response.status_code
 
-    docs = client.documents.read(
-        ["/temp/doc1.json"], categories=["content", "metadata"]
-    )
+    docs = client.documents.read("/temp/doc1.json", categories=["content", "metadata"])
 
     _verify_test_metadata_exists(docs[0])
 
 
 def test_only_quality_and_permissions(client: Client):
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                {"doc": 1},
-                permissions={
-                    "python-tester": ["read", "update"],
-                    "qconsole-user": "execute",
-                },
-                quality=2,
-            ),
-        ]
+        Document(
+            "/temp/doc1.json",
+            {"doc": 1},
+            permissions={
+                "python-tester": ["read", "update"],
+                "qconsole-user": "execute",
+            },
+            quality=2,
+        ),
     )
 
     assert 200 == response.status_code
 
-    doc = client.documents.read(
-        ["/temp/doc1.json"], categories=["content", "metadata"]
-    )[0]
+    docs = client.documents.read("/temp/doc1.json", categories=["content", "metadata"])
+    assert len(docs) == 1
+    doc = docs[0]
     assert 2 == doc.quality
     assert 0 == len(doc.collections)
     assert 0 == len(doc.properties.keys())
@@ -64,13 +58,11 @@ def test_only_quality_and_permissions(client: Client):
 
 def test_only_quality(client: Client):
     response = client.documents.write(
-        [
-            Document(
-                "/temp/doc1.json",
-                {"doc": 1},
-                quality=2,
-            ),
-        ]
+        Document(
+            "/temp/doc1.json",
+            {"doc": 1},
+            quality=2,
+        ),
     )
 
     assert (
