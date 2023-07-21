@@ -144,6 +144,24 @@ class Document(Metadata):
         self.extract = extract
         self.temporal_document = temporal_document
 
+    @property
+    def metadata(self):
+        """
+        Returns a dict containing the 5 attributes that comprise the metadata of a 
+        document in MarkLogic.
+        """
+        return {
+            "permissions": self.permissions,
+            "collections": self.collections,
+            "quality": self.quality,
+            "metadata_values": self.metadata_values,
+            "properties": self.properties,
+        }
+
+    def __repr__(self):
+        # Print all class attributes for easy inspection.
+        return "{!r}".format(self.__dict__)
+
     def to_request_field(self) -> RequestField:
         """
         Returns a multipart request field representing the document to be written.
@@ -398,9 +416,9 @@ class DocumentManager:
 
     def search(
         self,
+        q: str = None,
         query: Union[dict, str] = None,
         categories: list[str] = None,
-        q: str = None,
         start: int = None,
         page_length: int = None,
         options: str = None,

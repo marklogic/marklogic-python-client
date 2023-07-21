@@ -249,7 +249,7 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6e750292896cdb4027ec135cc05558f8a3718e92bb70d3dc9f3f6f52ebea3fa0"
+content-hash = "04c1fff7ce44488837c853d4e231dc9a0c7c901af9b13dfca493098292e8253a"
 
 [metadata.files]
 black = [
