@@ -24,6 +24,37 @@ def test_structured_xml_query(client: Client):
     assert len(docs) == 2
 
 
+def test_serialized_cts_json_query(client: Client):
+    query = {"ctsquery": {"wordQuery": {"text": "world"}}}
+    docs = client.documents.search(query=query)
+    assert len(docs) == 2
+
+
+def test_serialized_cts_xml_query(client: Client):
+    query = "<word-query xmlns='http://marklogic.com/cts'>\
+        <text>world</text></word-query>"
+    docs = client.documents.search(query=query)
+    assert len(docs) == 2
+
+
+def test_combined_json_query(client: Client):
+    options = {"constraint": {"name": "c1", "value": {"element": {"name": "hello"}}}}
+    query = {
+        "search": {"options": options},
+        "qtext": "c1:world",
+    }
+    docs = client.documents.search(query=query)
+    assert len(docs) == 2
+
+
+def test_combined_xml_query(client: Client):
+    query = "<search xmlns='http://marklogic.com/appservices/search'><options>\
+        <constraint name='c1'><value><element name='hello'/></value></constraint>\
+        </options><qtext>c1:world</qtext></search>"
+    docs = client.documents.search(query=query)
+    assert len(docs) == 2
+
+
 def test_qtext_and_start(client: Client):
     docs = client.documents.search(q="world", start=2)
     assert len(docs) == 1, "2 docs match, but start=2, so only 1 should be returned"

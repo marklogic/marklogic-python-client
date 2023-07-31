@@ -10,7 +10,7 @@ license = "Apache 2.0"
 [tool.poetry.dependencies]
 python = "^3.9"
 requests = "^2.31.0"
-requests_toolbelt = "1.0.0"
+requests_toolbelt = "^1.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
