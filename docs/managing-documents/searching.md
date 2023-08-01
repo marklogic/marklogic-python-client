@@ -1,8 +1,9 @@
 ---
 layout: default
-title: Searching Documents
-parent: Managing Documents
+title: Searching documents
+parent: Managing documents
 nav_order: 3
+permalink: /documents/searching
 ---
 
 The [POST /v1/search endpoint](https://docs.marklogic.com/REST/POST/v1/search) in the MarkLogic REST API supports
@@ -14,8 +15,9 @@ via the `client.documents.search` method.
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
-[Getting Started](getting-started.md) guide. To run these examples, please run the following script first, which will 
+[setup guide](/setup). To run these examples, please run the following script first, which will 
 create a `Client` instance that interacts with the out-of-the-box "Documents" database in MarkLogic:
+
 ```
 from marklogic import Client
 from marklogic.documents import Document, DefaultMetadata
@@ -122,7 +124,7 @@ docs = client.documents.search(collections=["python-example"])
 assert len(docs) == 2
 ```
 
-Similar to [reading documents](reading.md), you can use the `categories` argument to control what is returned for 
+Similar to [reading documents](/documents/reading), you can use the `categories` argument to control what is returned for 
 each matching document:
 
 ```
@@ -146,7 +148,7 @@ docs = client.documents.search("example", params={"database": "Documents"})
 assert len(docs) == 2
 ```
 
-# Error handling
+## Error handling
 
 A POST call to the /v1/search endpoint in MarkLogic will return an HTTP response with a status code of 200 for a
 successful request. For any other status code, the `client.documents.search` method will the `requests` `Response` object,

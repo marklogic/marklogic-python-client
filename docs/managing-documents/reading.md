@@ -1,8 +1,9 @@
 ---
 layout: default
-title: Reading Documents
-parent: Managing Documents
-nav_order: 3
+title: Reading documents
+parent: Managing documents
+nav_order: 2
+permalink: /documents/reading
 ---
 
 The [GET /v1/documents](https://docs.marklogic.com/REST/GET/v1/documents) endpoint in the MarkLogic REST API supports
@@ -12,8 +13,9 @@ handling the response by converting it into a list of `Document` instances via t
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
-[Getting Started](getting-started.md) guide. To run these examples, please run the following script first, which will 
+[setup guide](/setup). To run these examples, please run the following script first, which will 
 create a `Client` instance that interacts with the out-of-the-box "Documents" database in MarkLogic:
+
 ```
 from marklogic import Client
 from marklogic.documents import Document, DefaultMetadata

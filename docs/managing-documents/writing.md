@@ -1,15 +1,16 @@
 ---
 layout: default
-title: Writing Documents
-nav_order: 2
-parent: Managing Documents
+title: Writing documents
+nav_order: 1
+parent: Managing documents
+permalink: /documents/writing
 ---
 
 The [POST /v1/documents](https://docs.marklogic.com/REST/POST/v1/documents) endpoint in the MarkLogic REST API supports
 writing multiple documents with metadata via a multipart HTTP request. The MarkLogic Python client 
 simplifies the use of this endpoint via the `client.documents.write` method and the `Document`
 class. The examples below all assume that you have constructed a `Client` instance already as described in the 
-[Getting Started](getting-started.md) guide.
+[setup guide](/setup).
 
 ## Writing documents with metadata
 
@@ -96,7 +97,7 @@ that occurs most recently before it in the list (if one exists).
 ## Additional control over writing a document
 
 The "Usage Notes" section in the [POST /v1/documents documentation](https://docs.marklogic.com/REST/POST/v1/documents)
-describes how several parameters can be used to control how each document is written. Those inputs are:
+describes how several parameters can be used to control how each document is written. Those parameters are:
 
 1. `extension` = a URI suffix for use when [MarkLogic generates the URI](https://docs.marklogic.com/guide/rest-dev/bulk#id_86768).
 2. `directory` = a URI prefix for use when MarkLogic generates the URI.
@@ -113,3 +114,10 @@ URI beginning with "/example/" and ending with ".json", with MarkLogic adding a 
 construct the URI:
 
     client.documents.write([Document(null, {"doc": 1}, extension=".json", directory="/example/")])
+
+## Error handling
+
+Because the `client.documents.write` method returns a `requests Response` object, any error that occurs during 
+processing of the request will be captured within that `Response` object. The client does not attempt to provide any 
+additional information, as the MarkLogic REST API will already provide details within the response body and potentially
+the response headers as well.
