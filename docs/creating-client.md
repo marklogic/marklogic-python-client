@@ -1,13 +1,9 @@
 ---
 layout: default
-title: Getting Started
-nav_order: 2
+title: Creating a client
+nav_order: 3
+permalink: /client
 ---
-
-**Until the 1.0 release is available**, please follow the instructions in the CONTRIBUTING.md file for installing the 
-MarkLogic Python client into a Python virtual environment.
-
-## Connecting to MarkLogic
 
 The `Client` class is the primary API to interact with in the MarkLogic Python client. The
 `Client` class extends the `requests` 
@@ -15,25 +11,16 @@ The `Client` class is the primary API to interact with in the MarkLogic Python c
 found in both the `Session` class and the `requests` API. You can therefore use a `Client` object in the same manner 
 as you'd use either the `Session` class or the `requests` API.
 
-To try out any of the examples below or in the rest of this guide, you will first need to create a new MarkLogic user. 
-To do so, please go to the Admin application for your MarkLogic instance - e.g. if you are running MarkLogic locally, 
-this will be at <http://localhost:8001>, and you will authenticate as your "admin" user. Then perform the following 
-steps to create a new user:
+## Creating a client
 
-1. Click on "Users" in the "Security" box.
-2. Click on "Create".
-3. In the form, enter "python-user" for "User Name" and "pyth0n" as the password. 
-4. Scroll down until you see the "Roles" section. Click on the "rest-reader" and "rest-writer" checkboxes. 
-5. Scroll to the top or bottom and click on "OK" to create the user.
-
-A `Client` instance can be constructed either by providing a base URL for all requests along with authentication:
+A `Client` instance can be created either by providing a base URL for all requests along with authentication:
 
 ```
 from marklogic import Client
 client = Client('http://localhost:8000', digest=('python-user', 'pyth0n'))
 ```
 
-Or via separate arguments for each of the parts of a base URL:
+Or via separate arguments for each part of a base URL:
 
 ```
 from marklogic import Client
