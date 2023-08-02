@@ -8,7 +8,7 @@ permalink: /documents/searching
 
 The [POST /v1/search endpoint](https://docs.marklogic.com/REST/POST/v1/search) in the MarkLogic REST API supports
 returning content and metadata for each matching document. Similar to reading multiple documents via the 
-[GET /v1/documents endpoint](https://docs.marklogic.com/REST/GET/v1/documents, the data is returned in a multipart
+[GET /v1/documents endpoint](https://docs.marklogic.com/REST/GET/v1/documents), the data is returned in a multipart
 HTTP response. The MarkLogic Python client simplifies use of this operation by returning a list of `Document` instances
 via the `client.documents.search` method.
 
@@ -139,9 +139,10 @@ assert docs[0].content is None
 assert docs[1].content is None
 ```
 
-The `client.documents.search` method provides a `**kwargs` argument, so you can pass in any other arguments you would
-normally pass to `requests`, such as a `params` argument that specifies additional parameters:
+## Providing additional arguments
 
+The `client.documents.search` method provides a `**kwargs` argument, so you can pass in any other arguments you would
+normally pass to `requests`. For example:
 
 ```
 docs = client.documents.search("example", params={"database": "Documents"})
@@ -150,6 +151,6 @@ assert len(docs) == 2
 
 ## Error handling
 
-A POST call to the /v1/search endpoint in MarkLogic will return an HTTP response with a status code of 200 for a
-successful request. For any other status code, the `client.documents.search` method will the `requests` `Response` object,
-providing access to the error details returned by MarkLogic.
+If the `client.documents.read` method receives an HTTP response with a status code of 200, then the client will return
+a list of `Document` instances. For any other status code, the client will return the `requests` `Response` object, 
+providing access to the error details returned by the MarkLogic REST API.

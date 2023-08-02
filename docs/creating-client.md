@@ -35,7 +35,7 @@ response = client.post('/v1/search')
 response = client.get('/v1/documents', params={'uri': '/my-doc.json'})
 ```
 
-Because the `Client` class extends the `Sessions` class, it can be used as a context manager:
+Because the `Client` class extends the `Session` class, it can be used as a context manager:
 
 ```
 with Client('http://localhost:8000', digest=('python-user', 'pyth0n')) as client:

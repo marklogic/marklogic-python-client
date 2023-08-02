@@ -89,8 +89,19 @@ docs = client.documents.read(uris, categories=["collections"])
 print(docs)
 ```
 
-# Error handling
+## Providing additional arguments
 
-A GET call to the /v1/documents endpoint in MarkLogic will return an HTTP response with a status code of 200 for a
-successful request. For any other status code, the `client.documents.read` method will the `requests` `Response` object,
-providing access to the error details returned by MarkLogic.
+The `client.documents.read` method provides a `**kwargs` argument, so you can pass in any other arguments you would
+normally pass to `requests`. For example:
+
+```
+uris = ["/doc1.json", "/doc2.xml", "/doc3.bin"]
+docs = client.documents.read(uris, params={"database": "Documents"})
+assert len(docs) == 2
+```
+
+## Error handling
+
+If the `client.documents.read` method receives an HTTP response with a status code of 200, then the client will return
+a list of `Document` instances. For any other status code, the client will return the `requests` `Response` object, 
+providing access to the error details returned by the MarkLogic REST API.
