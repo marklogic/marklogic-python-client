@@ -138,6 +138,15 @@ construct the URI:
 client.documents.write([Document(None, {"doc": 1}, extension=".json", directory="/example/")])
 ```
 
+## Providing additional arguments
+
+The `client.documents.write` method provides a `**kwargs` argument, so you can pass in any other arguments you would
+normally pass to `requests`. For example:
+
+```
+response = client.documents.write(Document("/doc1.json", {"doc": 1}, permissions=default_perms), params={"database": "Documents"})
+```
+
 ## Error handling
 
 Because the `client.documents.write` method returns a `requests Response` object, any error that occurs during 
