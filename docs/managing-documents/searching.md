@@ -24,9 +24,9 @@ from marklogic.documents import Document, DefaultMetadata
 
 client = Client('http://localhost:8000', digest=('python-user', 'pyth0n'))
 client.documents.write([
-    DefaultMetadata(permissions={"rest-reader": ["read", "update"]}, collections=["python-example"]),
-    Document("/doc1.json", {"text": "example one"}),
-    Document("/doc2.json", {"text": "example two"})
+    DefaultMetadata(permissions={"rest-reader": ["read", "update"]}, collections=["python-search-example"]),
+    Document("/search/doc1.json", {"text": "hello world"}),
+    Document("/search/doc2.json", {"text": "hello again"})
 ])
 ```
 
@@ -37,12 +37,12 @@ a search string that utilizes the
 [the MarkLogic search grammar](https://docs.marklogic.com/guide/search-dev/search-api#id_41745):
 
 ```
-# Find documents with the term "example" in them.
-docs = client.documents.search("example")
+# Find documents with the term "hello" in them.
+docs = client.documents.search("hello")
 assert len(docs) == 2
 
-# Find documents with the term "one" in them.
-docs = client.documents.search("one")
+# Find documents with the term "world" in them.
+docs = client.documents.search("world")
 assert len(docs) == 1
 ```
 
@@ -65,12 +65,12 @@ Examples of a structured query:
 
 ```
 # JSON
-docs = client.documents.search(query={"query": {"term-query": {"text": "example"}}})
+docs = client.documents.search(query={"query": {"term-query": {"text": "hello"}}})
 assert len(docs) == 2
 
 # XML
 query = "<query xmlns='http://marklogic.com/appservices/search'>\
-        <term-query><text>example</text></term-query></query>"
+        <term-query><text>hello</text></term-query></query>"
 docs = client.documents.search(query=query)
 assert len(docs) == 2
 ```
@@ -79,12 +79,12 @@ Examples of a serialized CTS query:
 
 ```
 # JSON
-query = {"ctsquery": {"wordQuery": {"text": "example"}}}
+query = {"ctsquery": {"wordQuery": {"text": "hello"}}}
 docs = client.documents.search(query=query)
 assert len(docs) == 2
 
 # XML
-query = "<word-query xmlns='http://marklogic.com/cts'><text>world</text></word-query>"
+query = "<word-query xmlns='http://marklogic.com/cts'><text>hello</text></word-query>"
 docs = client.documents.search(query=query)
 assert len(docs) == 2
 ```
@@ -96,7 +96,7 @@ Examples of a combined query:
 options = {"constraint": {"name": "c1", "word": {"element": {"name": "text"}}}}
 query = {
     "search": {"options": options},
-    "qtext": "c1:example",
+    "qtext": "c1:hello",
 }
 docs = client.documents.search(query=query)
 assert len(docs) == 2
@@ -104,7 +104,7 @@ assert len(docs) == 2
 # XML
 query = "<search xmlns='http://marklogic.com/appservices/search'><options>\
         <constraint name='c1'><word><element name='text'/></word></constraint>\
-        </options><qtext>c1:example</qtext></search>"
+        </options><qtext>c1:hello</qtext></search>"
 docs = client.documents.search(query=query)
 assert len(docs) == 2
 ```
@@ -116,11 +116,11 @@ more commonly used parameters are available as arguments in the `client.document
 
 ```
 # Specify the starting point and page length.
-docs = client.documents.search("example", start=2, page_length=5)
+docs = client.documents.search("hello", start=2, page_length=5)
 assert len(docs) == 1
 
 # Search via a collection without any search string.
-docs = client.documents.search(collections=["python-example"])
+docs = client.documents.search(collections=["python-search-example"])
 assert len(docs) == 2
 ```
 
@@ -129,12 +129,12 @@ each matching document:
 
 ```
 # Retrieve all content and metadata for each matching document.
-docs = client.documents.search("example", categories=["content", "metadata"])
-assert "python-example" in docs[0].collections
-assert "python-example" in docs[1].collections
+docs = client.documents.search("hello", categories=["content", "metadata"])
+assert "python-search-example" in docs[0].collections
+assert "python-search-example" in docs[1].collections
 
 # Retrieve only permissions for each matching document.
-docs = client.documents.search("example", categories=["permissions"])
+docs = client.documents.search("hello", categories=["permissions"])
 assert docs[0].content is None
 assert docs[1].content is None
 ```
@@ -145,7 +145,7 @@ The `client.documents.search` method provides a `**kwargs` argument, so you can 
 normally pass to `requests`. For example:
 
 ```
-docs = client.documents.search("example", params={"database": "Documents"})
+docs = client.documents.search("hello", params={"database": "Documents"})
 assert len(docs) == 2
 ```
 
