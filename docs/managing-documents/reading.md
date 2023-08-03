@@ -97,7 +97,7 @@ normally pass to `requests`. For example:
 ```
 uris = ["/doc1.json", "/doc2.xml", "/doc3.bin"]
 docs = client.documents.read(uris, params={"database": "Documents"})
-assert len(docs) == 2
+print(docs)
 ```
 
 ## Error handling
