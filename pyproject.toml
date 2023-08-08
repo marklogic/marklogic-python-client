@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "marklogic"
-version = "0.1.0"
-description = ""
-authors = ["Rob Rudin <rob.rudin@marklogic.com>"]
+name = "marklogic-python-client"
+version = "0.9.1"
+description = "Python client for MarkLogic, built on the requests library"
+authors = ["MarkLogic <general@developer.marklogic.com>"]
 readme = "README.md"
-# packages = [{include = "marklogic_python_client"}]
+packages = [{include = "marklogic"}]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
