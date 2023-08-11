@@ -6,6 +6,14 @@ MarkLogic Python Client further simplifies usage of the `requests` library by su
 strategies with MarkLogic and improving the user experience with some of the more common endpoints in the MarkLogic
 REST API.
 
+The client requires Python 3.9 or higher. It is [available at PyPI](https://pypi.org/project/marklogic-python-client/)
+and can be [installed via pip](https://packaging.python.org/en/latest/guides/tool-recommendations/):
+
+    pip install marklogic-python-client
+
+The client's sole dependency with MarkLogic is on the MarkLogic REST API. MarkLogic 10 and higher is supported, and 
+earlier versions of MarkLogic that support the MarkLogic REST API are likely to work as well though are not tested.
+
 An instance of the client can be easily created and then used in the exact same way as the `requests` API:
 
 ```
