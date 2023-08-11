@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "marklogic-python-client"
-version = "0.9.1"
+version = "1.0.0"
 description = "Python client for MarkLogic, built on the requests library"
 authors = ["MarkLogic <general@developer.marklogic.com>"]
 readme = "README.md"
