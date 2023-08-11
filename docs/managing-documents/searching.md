@@ -15,7 +15,7 @@ via the `client.documents.search` method.
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
-[setup guide](/setup). To run these examples, please run the following script first, which will 
+[setup guide](../example-setup.md). To run these examples, please run the following script first, which will 
 create a `Client` instance that interacts with the out-of-the-box "Documents" database in MarkLogic:
 
 ```
@@ -124,7 +124,7 @@ docs = client.documents.search(collections=["python-search-example"])
 assert len(docs) == 2
 ```
 
-Similar to [reading documents](/documents/reading), you can use the `categories` argument to control what is returned for 
+Similar to [reading documents](reading.md), you can use the `categories` argument to control what is returned for 
 each matching document:
 
 ```

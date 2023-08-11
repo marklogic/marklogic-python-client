@@ -27,10 +27,10 @@ response = client.get("/v1/search", params={"q": "marklogic and python", "pageLe
 ```
 
 The example above and the examples throughout this documentation depend on a MarkLogic user named "python-user". 
-If you wish to try these examples on your own installation of MarkLogic, please see [the setup guide](/setup)
+If you wish to try these examples on your own installation of MarkLogic, please see [the setup guide](example-setup.md)
 for instructions on creating this user. 
 
-Otherwise, please see the [guide on creating a client](/client) for more information on connecting to a 
-MarkLogic REST API instance. The [guide on managing documents](/documents) provides
+Otherwise, please see the [guide on creating a client](creating-client.md) for more information on connecting to a 
+MarkLogic REST API instance. The [guide on managing documents](managing-documents/managing-documents.md) provides
 more information on how the client simplifies writing and reading multiple documents in a single request.
 

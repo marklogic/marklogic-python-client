@@ -12,7 +12,7 @@ simplifies the use of this endpoint via the `client.documents.write` method and 
 class. 
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
-[setup guide](/setup). In addition, each of the examples below requires the following `Client` instance to be created 
+[setup guide](../example-setup.md). In addition, each of the examples below requires the following `Client` instance to be created 
 first:
 
 ```

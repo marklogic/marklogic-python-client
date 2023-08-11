@@ -13,7 +13,7 @@ handling the response by converting it into a list of `Document` instances via t
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
-[setup guide](/setup). To run these examples, please run the following script first, which will 
+[setup guide](../example-setup.md). To run these examples, please run the following script first, which will 
 create a `Client` instance that interacts with the out-of-the-box "Documents" database in MarkLogic:
 
 ```
