@@ -147,6 +147,9 @@ normally pass to `requests`. For example:
 response = client.documents.write(Document("/doc1.json", {"doc": 1}, permissions=default_perms), params={"database": "Documents"})
 ```
 
+Please see [the application developer's guide](https://docs.marklogic.com/guide/rest-dev/documents#id_11953) for 
+more information on writing documents.
+
 ## Error handling
 
 Because the `client.documents.write` method returns a `requests Response` object, any error that occurs during 

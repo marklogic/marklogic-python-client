@@ -124,8 +124,11 @@ docs = client.documents.search(collections=["python-search-example"])
 assert len(docs) == 2
 ```
 
-Similar to [reading documents](reading.md), you can use the `categories` argument to control what is returned for 
-each matching document:
+Metadata for each document can be retrieved via the `categories` argument. The acceptable values for this argument
+match those of the `category` parameter in the [search endpoint](https://docs.marklogic.com/REST/POST/v1/search)
+documentation: `content`, `metadata`, `metadata-values`, `collections`, `permissions`, `properties`, and `quality`.
+
+The following shows different examples of configuring the `categories` argument:
 
 ```
 # Retrieve all content and metadata for each matching document.
@@ -148,6 +151,9 @@ normally pass to `requests`. For example:
 docs = client.documents.search("hello", params={"database": "Documents"})
 assert len(docs) == 2
 ```
+
+Please see [the application developer's guide](https://docs.marklogic.com/guide/rest-dev/search#id_49329)
+for more information on searching documents.
 
 ## Error handling
 

@@ -35,8 +35,19 @@ A list of `Document` instances can be obtained for a list of URIs, where each `D
 attributes populated but no metadata by default:
 
 ```
+# Read multiple documents via a list of URIs.
 docs = client.documents.read(["/doc1.json", "/doc2.xml", "/doc3.bin"])
 assert len(docs) == 3
+
+# Read a single document, verifying that it does not have any metadata.
+doc = client.documents.read("/doc1.json")[0]
+assert "/doc1.json" == doc.uri
+assert "example one" == doc.content["text"]
+assert doc.collections is None
+assert doc.permissions is None
+assert doc.quality is None
+assert doc.metadata_values is None
+assert doc.properties is None
 ```
 
 The [requests toolbelt](https://toolbelt.readthedocs.io/en/latest/) library is used to process the multipart
@@ -99,6 +110,9 @@ uris = ["/doc1.json", "/doc2.xml", "/doc3.bin"]
 docs = client.documents.read(uris, params={"database": "Documents"})
 print(docs)
 ```
+
+Please see [the application developer's guide](https://docs.marklogic.com/guide/rest-dev/documents#id_80116)
+for more information on reading documents.
 
 ## Error handling
 
