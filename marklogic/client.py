@@ -2,6 +2,7 @@ import requests
 from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
 from marklogic.rows import RowManager
+from marklogic.transactions import TransactionManager
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -77,3 +78,9 @@ class Client(requests.Session):
         if not hasattr(self, "_rows"):
             self._rows = RowManager(self)
         return self._rows
+
+    @property
+    def transactions(self):
+        if not hasattr(self, "_transactions"):
+            self._transactions = TransactionManager(self)
+        return self._transactions
