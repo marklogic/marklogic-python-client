@@ -160,3 +160,7 @@ for more information on searching documents.
 If the `client.documents.read` method receives an HTTP response with a status code of 200, then the client will return
 a list of `Document` instances. For any other status code, the client will return the `requests` `Response` object, 
 providing access to the error details returned by the MarkLogic REST API.
+
+The `status_code` and `text` fields in the `Response` object will typically be of the most interest when 
+debugging a problem. Please see 
+[Response API documentation](https://docs.python-requests.org/en/latest/api/#requests.Response) for complete information on what's available in this object.
