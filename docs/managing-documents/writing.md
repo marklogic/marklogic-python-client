@@ -156,3 +156,7 @@ Because the `client.documents.write` method returns a `requests Response` object
 processing of the request will be captured within that `Response` object. The client does not attempt to provide any 
 additional information, as the MarkLogic REST API will already provide details within the response body and potentially
 the response headers as well.
+
+The `status_code` and `text` fields in the `Response` object will typically be of the most interest when 
+debugging a problem. Please see 
+[Response API documentation](https://docs.python-requests.org/en/latest/api/#requests.Response) for complete information on what's available in this object.
