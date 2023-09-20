@@ -75,17 +75,21 @@ def test_search_options(client: Client):
 
 def test_collection(client: Client):
     docs = client.documents.search(
-        categories=["content", "collections"], collections=["test-data"]
+        categories=["content", "collections"], collections=["search-test"]
     )
     assert len(docs) == 2
 
     doc1 = next(doc for doc in docs if doc.uri == "/doc1.json")
     assert doc1.content is not None
-    assert doc1.collections[0] == "test-data"
+    assert len(doc1.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
 
     doc2 = next(doc for doc in docs if doc.uri == "/doc2.xml")
     assert doc2.content is not None
-    assert doc2.collections[0] == "test-data"
+    assert len(doc1.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
 
 
 def test_not_rest_user(not_rest_user_client: Client):

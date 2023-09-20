@@ -91,8 +91,9 @@ def test_read_only_collections(client: Client):
 
     doc1 = docs[0]
     assert doc1.uri == "/doc1.json"
-    assert len(doc1.collections) == 1
-    assert doc1.collections[0] == "test-data"
+    assert len(doc1.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
     assert doc1.content is None
     assert doc1.permissions is None
     assert doc1.quality is None
@@ -101,8 +102,9 @@ def test_read_only_collections(client: Client):
 
     doc2 = docs[1]
     assert doc2.uri == "/doc2.xml"
-    assert len(doc2.collections) == 1
-    assert doc2.collections[0] == "test-data"
+    assert len(doc2.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
     assert doc2.content is None
     assert doc2.permissions is None
     assert doc2.quality is None
