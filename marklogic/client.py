@@ -1,6 +1,7 @@
 import requests
 from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
+from marklogic.rows import RowManager
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -70,3 +71,9 @@ class Client(requests.Session):
         if not hasattr(self, "_documents"):
             self._documents = DocumentManager(self)
         return self._documents
+
+    @property
+    def rows(self):
+        if not hasattr(self, "_rows"):
+            self._rows = RowManager(self)
+        return self._rows
