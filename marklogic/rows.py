@@ -3,24 +3,23 @@ from requests import Session
 
 """
 Defines a RowManager class to simplify usage of the "/v1/rows" & "/v1/rows/graphql" REST
-endpoints defined at https://docs.marklogic.com/REST/POST/v1/rows/graphql
+endpoints defined at https://docs.marklogic.com/REST/POST/v1/rows/graphql.
 """
 
 
 class RowManager:
     """
-    Provides a method to simplify sending a GraphQL request to the GraphQL rows endpoint.
+    Provides a method to simplify sending a GraphQL
+    request to the GraphQL rows endpoint.
     """
 
     def __init__(self, session: Session):
         self._session = session
 
-    def graphql(
-        self, graphql_query: str, return_response: bool = False, *args, **kwargs
-    ):
+    def graphql(self, graphql_query: str, return_response: bool = False, **kwargs):
         """
         Send a GraphQL query to MarkLogic via a POST to the endpoint defined at
-        https://docs.marklogic.com/REST/POST/v1/rows/graphql
+        https://docs.marklogic.com/REST/POST/v1/rows/graphql.
 
         :param graphql_query: a GraphQL query string. Note - this is the query string
         only, not the entire query JSON object. See the following for more information:
@@ -69,18 +68,17 @@ class RowManager:
         sparql: str = None,
         format: str = "json",
         return_response: bool = False,
-        *args,
         **kwargs
     ):
         """
         Send a query to MarkLogic via a POST to the endpoint defined at
-        https://docs.marklogic.com/REST/POST/v1/rows
+        https://docs.marklogic.com/REST/POST/v1/rows.
         Just like that endpoint, this function can be used for four different types of
         queries: Optic DSL, Serialized Optic, SQL, and SPARQL. The type of query
         processed by the function is dependent upon the parameter used in the call to
         the function.
         For more information about Optic and using the Optic DSL, SQL, and SPARQL,
-        see https://docs.marklogic.com/guide/app-dev/OpticAPI
+        see https://docs.marklogic.com/guide/app-dev/OpticAPI.
         If multiple query parameters are passed into the call, the function uses the
         query parameter that is first in the list: dsl, plan, sql, sparql.
 
