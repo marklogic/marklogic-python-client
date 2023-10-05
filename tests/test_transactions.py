@@ -2,6 +2,7 @@ import requests
 import time
 from marklogic import Client
 from marklogic.documents import Document
+from requests.exceptions import HTTPError
 
 PERMS = {"python-tester": ["read", "update"]}
 
@@ -65,7 +66,7 @@ def test_time_limit(client: Client):
             doc1 = Document("/t1.json", {}, permissions=PERMS)
             client.documents.write(doc1, tx=tx)
 
-    except AssertionError as error:
+    except HTTPError as error:
         assert error.args[0].startswith("Could not end transaction")
         assert "No transaction with identifier" in error.args[0]
         assert "XDMP-NOTXN" in error.args[0]
