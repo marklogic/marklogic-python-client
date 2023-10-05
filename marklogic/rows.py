@@ -1,5 +1,5 @@
 import json
-from requests import Session, Response
+from requests import Session
 
 """
 Defines a RowManager class to simplify usage of the "/v1/rows" & "/v1/rows/graphql" REST
@@ -15,7 +15,9 @@ class RowManager:
     def __init__(self, session: Session):
         self._session = session
 
-    def graphql(self, graphql_query: str, return_response: bool = False, *args, **kwargs):
+    def graphql(
+        self, graphql_query: str, return_response: bool = False, *args, **kwargs
+    ):
         """
         Send a GraphQL query to MarkLogic via a POST to the endpoint defined at
         https://docs.marklogic.com/REST/POST/v1/rows/graphql
@@ -48,7 +50,7 @@ class RowManager:
         "xml": "application/xml",
         "csv": "text/csv",
         "json-seq": "application/json-seq",
-        "mixed": "application/xml, multipart/mixed"
+        "mixed": "application/xml, multipart/mixed",
     }
 
     __query_format_switch = {
@@ -56,10 +58,20 @@ class RowManager:
         "xml": lambda response: response.text,
         "csv": lambda response: response.text,
         "json-seq": lambda response: response.text,
-        "mixed": lambda response: response
+        "mixed": lambda response: response,
     }
 
-    def query(self, dsl: str = None, plan: dict = None, sql: str = None, sparql: str = None, format: str = "json", return_response: bool = False, *args, **kwargs):
+    def query(
+        self,
+        dsl: str = None,
+        plan: dict = None,
+        sql: str = None,
+        sparql: str = None,
+        format: str = "json",
+        return_response: bool = False,
+        *args,
+        **kwargs
+    ):
         """
         Send a query to MarkLogic via a POST to the endpoint defined at
         https://docs.marklogic.com/REST/POST/v1/rows
@@ -86,10 +98,7 @@ class RowManager:
         headers["Content-Type"] = request_info["content-type"]
         headers["Accept"] = RowManager.__accept_switch.get(format)
         response = self._session.post(
-            "v1/rows",
-            headers=headers,
-            data=request_info["data"],
-            **kwargs
+            "v1/rows", headers=headers, data=request_info["data"], **kwargs
         )
         return (
             RowManager.__query_format_switch.get(format)(response)
@@ -111,22 +120,15 @@ class RowManager:
         if dsl is not None:
             return {
                 "content-type": "application/vnd.marklogic.querydsl+javascript",
-                "data": dsl
+                "data": dsl,
             }
         if plan is not None:
-            return {
-                "content-type": "application/json",
-                "data": plan
-            }
+            return {"content-type": "application/json", "data": plan}
         if sql is not None:
-            return {
-                "content-type": "application/sql",
-                "data": sql
-            }
+            return {"content-type": "application/sql", "data": sql}
         if sparql is not None:
-            return {
-                "content-type": "application/sparql-query",
-                "data": sparql
-            }
+            return {"content-type": "application/sparql-query", "data": sparql}
         else:
-            raise ValueError("No query found; must specify one of: dsl, plan, sql, or sparql")
+            raise ValueError(
+                "No query found; must specify one of: dsl, plan, sql, or sparql"
+            )
