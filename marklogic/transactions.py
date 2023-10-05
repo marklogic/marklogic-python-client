@@ -1,5 +1,6 @@
 import logging
 from requests import Response, Session
+from requests.exceptions import HTTPError
 
 logger = logging.getLogger(__name__)
 
@@ -71,9 +72,10 @@ class Transaction:
             if len(args) > 1 and isinstance(args[1], Exception)
             else self.commit()
         )
-        assert (
-            204 == response.status_code
-        ), f"Could not end transaction; cause: {response.text}"
+        # raise_for_status() is not used here as it results in an error without any
+        # context of what went wrong.
+        if response.status_code != 204:
+            raise HTTPError(f"Could not end transaction; cause: {response.text}")
 
 
 class TransactionManager:
