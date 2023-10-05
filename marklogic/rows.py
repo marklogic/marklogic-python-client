@@ -2,47 +2,15 @@ import json
 from requests import Session
 
 """
-Defines a RowManager class to simplify usage of the "/v1/rows" & "/v1/rows/graphql" REST
-endpoints defined at https://docs.marklogic.com/REST/POST/v1/rows/graphql.
+Defines classes to simplify usage of the REST rows service defined at
+https://docs.marklogic.com/REST/client/row-management.
 """
 
 
 class RowManager:
-    """
-    Provides a method to simplify sending a GraphQL
-    request to the GraphQL rows endpoint.
-    """
 
     def __init__(self, session: Session):
         self._session = session
-
-    def graphql(self, graphql_query: str, return_response: bool = False, **kwargs):
-        """
-        Send a GraphQL query to MarkLogic via a POST to the endpoint defined at
-        https://docs.marklogic.com/REST/POST/v1/rows/graphql.
-
-        :param graphql_query: a GraphQL query string. Note - this is the query string
-        only, not the entire query JSON object. See the following for more information:
-        https://spec.graphql.org/October2021/#sec-Overview
-        https://graphql.org/learn/queries/
-        :param return_response: boolean specifying if the entire original response
-        object should be returned (True) or if only the data should be returned (False)
-        upon a success (2xx) response. Note that if the status code of the response is
-        not 2xx, then the entire response is always returned.
-        """
-        headers = kwargs.pop("headers", {})
-        headers["Content-Type"] = "application/graphql"
-        response = self._session.post(
-            "v1/rows/graphql",
-            headers=headers,
-            data=json.dumps({"query": graphql_query}),
-            **kwargs
-        )
-        return (
-            response.json()
-            if response.status_code == 200 and not return_response
-            else response
-        )
 
     __accept_switch = {
         "json": "application/json",
@@ -66,43 +34,55 @@ class RowManager:
         plan: dict = None,
         sql: str = None,
         sparql: str = None,
+        graphql: str = None,
         format: str = "json",
         return_response: bool = False,
         **kwargs
     ):
         """
-        Send a query to MarkLogic via a POST to the endpoint defined at
-        https://docs.marklogic.com/REST/POST/v1/rows.
-        Just like that endpoint, this function can be used for four different types of
-        queries: Optic DSL, Serialized Optic, SQL, and SPARQL. The type of query
-        processed by the function is dependent upon the parameter used in the call to
-        the function.
+        Sends a query to an endpoint at the MarkLogic rows service defined at
+        https://docs.marklogic.com/REST/client/row-management.
+
+        One of 'dsl', 'plan', 'sql', 'sparql', or 'graphql' must be defined.
         For more information about Optic and using the Optic DSL, SQL, and SPARQL,
-        see https://docs.marklogic.com/guide/app-dev/OpticAPI.
-        If multiple query parameters are passed into the call, the function uses the
-        query parameter that is first in the list: dsl, plan, sql, sparql.
+        see https://docs.marklogic.com/guide/app-dev/OpticAPI. If one or more of these
+        are passed into the call, the function uses the query parameter that is first
+        in the prior list.
 
         :param dsl: an Optic DSL query
         :param plan: a serialized Optic query
         :param sql: an SQL query
         :param sparql: a SPARQL query
+        :param graphql: a GraphQL query string. This is the query string
+        only, not the entire query JSON object. See
+        https://docs.marklogic.com/REST/POST/v1/rows/graphql for more information.
+        :param format: defines the format of the response. If a GraphQL query is
+        submitted, this parameter is ignored and a JSON response is always returned.
         :param return_response: boolean specifying if the entire original response
         object should be returned (True) or if only the data should be returned (False)
         upon a success (2xx) response. Note that if the status code of the response is
         not 2xx, then the entire response is always returned.
         """
-        request_info = self.__get_request_info(dsl, plan, sql, sparql)
+        path = "v1/rows/graphql" if graphql else "v1/rows"
         headers = kwargs.pop("headers", {})
-        headers["Content-Type"] = request_info["content-type"]
-        headers["Accept"] = RowManager.__accept_switch.get(format)
-        response = self._session.post(
-            "v1/rows", headers=headers, data=request_info["data"], **kwargs
-        )
-        return (
-            RowManager.__query_format_switch.get(format)(response)
-            if response.status_code == 200 and not return_response
-            else response
-        )
+        data = None
+        if graphql:
+            data = json.dumps({"query": graphql})
+            headers["Content-Type"] = "application/graphql"
+        else:
+            request_info = self.__get_request_info(dsl, plan, sql, sparql)
+            data = request_info["data"]
+            headers["Content-Type"] = request_info["content-type"]
+            headers["Accept"] = RowManager.__accept_switch.get(format)
+
+        response = self._session.post(path, headers=headers, data=data, **kwargs)
+        if response.ok and not return_response:
+            return (
+                response.json()
+                if graphql
+                else RowManager.__query_format_switch.get(format)(response)
+            )
+        return response
 
     def __get_request_info(self, dsl: str, plan: dict, sql: str, sparql: str):
         """
