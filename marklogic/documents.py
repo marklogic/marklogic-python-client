@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 from typing import Union
 
+from marklogic.transactions import Transaction
 from requests import Response, Session
 from requests_toolbelt.multipart.decoder import MultipartDecoder
 from urllib3.fields import RequestField
@@ -9,7 +10,7 @@ from urllib3.filepost import encode_multipart_formdata
 
 """
 Defines classes to simplify usage of the documents REST endpoint defined at
-https://docs.marklogic.com/REST/client/management. 
+https://docs.marklogic.com/REST/client/management.
 """
 
 
@@ -147,7 +148,7 @@ class Document(Metadata):
     @property
     def metadata(self):
         """
-        Returns a dict containing the 5 attributes that comprise the metadata of a 
+        Returns a dict containing the 5 attributes that comprise the metadata of a
         document in MarkLogic.
         """
         return {
@@ -344,7 +345,10 @@ class DocumentManager:
         self._session = session
 
     def write(
-        self, parts: Union[Document, list[Union[DefaultMetadata, Document]]], **kwargs
+        self,
+        parts: Union[Document, list[Union[DefaultMetadata, Document]]],
+        tx: Transaction = None,
+        **kwargs,
     ) -> Response:
         """
         Write one or many documents at a time via a POST to the endpoint defined at
@@ -355,6 +359,7 @@ class DocumentManager:
         after it that does not define its own metadata. See
         https://docs.marklogic.com/guide/rest-dev/bulk#id_16015 for more information on
         how the REST endpoint uses metadata.
+        :param tx: if set, the request will be associated with the given transaction.
         """
         fields = []
 
@@ -374,6 +379,10 @@ class DocumentManager:
 
         data, content_type = encode_multipart_formdata(fields)
 
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+
         headers = kwargs.pop("headers", {})
         headers["Content-Type"] = "".join(
             ("multipart/mixed",) + content_type.partition(";")[1:]
@@ -381,10 +390,16 @@ class DocumentManager:
         if not headers.get("Accept"):
             headers["Accept"] = "application/json"
 
-        return self._session.post("/v1/documents", data=data, headers=headers, **kwargs)
+        return self._session.post(
+            "/v1/documents", data=data, headers=headers, params=params, **kwargs
+        )
 
     def read(
-        self, uris: Union[str, list[str]], categories: list[str] = None, **kwargs
+        self,
+        uris: Union[str, list[str]],
+        categories: list[str] = None,
+        tx: Transaction = None,
+        **kwargs,
     ) -> Union[list[Document], Response]:
         """
         Read one or many documents via a GET to the endpoint defined at
@@ -395,12 +410,15 @@ class DocumentManager:
         :param categories: optional list of the categories of data to return for each
         URI. By default, only content will be returned for each URI. See the endpoint
         documentation for further information.
+        :param tx: if set, the request will be associated with the given transaction.
         """
         params = kwargs.pop("params", {})
         params["uri"] = uris if isinstance(uris, list) else [uris]
         params["format"] = "json"  # This refers to the metadata format.
         if categories:
             params["category"] = categories
+        if tx:
+            params["txid"] = tx.id
 
         headers = kwargs.pop("headers", {})
         headers["Accept"] = "multipart/mixed"
@@ -423,6 +441,7 @@ class DocumentManager:
         page_length: int = None,
         options: str = None,
         collections: list[str] = None,
+        tx: Transaction = None,
         **kwargs,
     ) -> Union[list[Document], Response]:
         """
@@ -442,6 +461,7 @@ class DocumentManager:
         :param page_length: maximum number of documents to return.
         :param options: name of a query options instance to use.
         :param collections: restrict results to documents in these collections.
+        :param tx: if set, the request will be associated with the given transaction.
         """
         params = kwargs.pop("params", {})
         params["format"] = "json"  # This refers to the metadata format.
@@ -457,6 +477,8 @@ class DocumentManager:
             params["pageLength"] = page_length
         if options:
             params["options"] = options
+        if tx:
+            params["txid"] = tx.id
 
         headers = kwargs.pop("headers", {})
         headers["Accept"] = "multipart/mixed"
