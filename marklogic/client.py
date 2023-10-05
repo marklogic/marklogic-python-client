@@ -3,6 +3,7 @@ from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
 from marklogic.rows import RowManager
 from marklogic.transactions import TransactionManager
+from marklogic.eval import EvalManager
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -84,3 +85,9 @@ class Client(requests.Session):
         if not hasattr(self, "_transactions"):
             self._transactions = TransactionManager(self)
         return self._transactions
+
+    @property
+    def eval(self):
+        if not hasattr(self, "_eval"):
+            self._eval = EvalManager(self)
+        return self._eval
