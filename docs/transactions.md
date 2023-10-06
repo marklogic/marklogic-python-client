@@ -1,11 +1,11 @@
 ---
 layout: default
 title: Managing transactions
-nav_order: 4
+nav_order: 5
 ---
 
-The [/v1/transactions endpoint](https://docs.marklogic.com/REST/client/transaction-management)
-in the MarkLogic REST API supports managing a transaction that can be referenced in 
+The [MarkLogic REST transactions service](https://docs.marklogic.com/REST/client/transaction-management)
+supports managing a transaction that can be referenced in 
 multiple separate calls to other REST API endpoints, with all calls being committed or 
 rolled back together. The MarkLogic Python client simplifies usage of these endpoints
 via a `Transaction` class that is also a 
