@@ -1,10 +1,14 @@
+import json
 import requests
+
+from decimal import Decimal
 from marklogic.cloud_auth import MarkLogicCloudAuth
-from marklogic.documents import DocumentManager
+from marklogic.documents import Document, DocumentManager
+from marklogic.eval import EvalManager
 from marklogic.rows import RowManager
 from marklogic.transactions import TransactionManager
-from marklogic.eval import EvalManager
 from requests.auth import HTTPDigestAuth
+from requests_toolbelt.multipart.decoder import MultipartDecoder
 from urllib.parse import urljoin
 
 
@@ -68,6 +72,58 @@ class Client(requests.Session):
         request.url = urljoin(self.base_url, request.url)
         return super(Client, self).prepare_request(request, *args, **kwargs)
 
+    def invoke(
+        self, module: str, vars: dict = None, return_response: bool = False, **kwargs
+    ):
+        """
+        Send a script (XQuery or JavaScript) and possibly a dict of vars
+        to MarkLogic via a POST to the endpoint defined at
+        https://docs.marklogic.com/REST/POST/v1/eval.
+
+        :param module: The URI of a module in the modules database of the app server
+        :param vars: a dict containing variables to include
+        :param return_response: boolean specifying if the entire original response
+        object should be returned (True) or if only the data should be returned (False)
+        upon a success (2xx) response. Note that if the status code of the response is
+        not 2xx, then the entire response is always returned.
+        """
+        data = {"module": module}
+        if vars is not None:
+            data["vars"] = json.dumps(vars)
+        response = self.post("v1/invoke", data=data, **kwargs)
+        return (
+            self.process_multipart_mixed_response(response)
+            if response.status_code == 200 and not return_response
+            else response
+        )
+
+    def process_multipart_mixed_response(self, response):
+        """
+        Process a multipart REST response by putting them in a list and
+        transforming each part based on the "X-Primitive" header.
+
+        :param response: The original multipart/mixed response from a call to a
+        MarkLogic server.
+        """
+        if "Content-Length" in response.headers:
+            return None
+
+        parts = MultipartDecoder.from_response(response).parts
+        transformed_parts = []
+        for part in parts:
+            encoding = part.encoding
+            primitive_header = part.headers["X-Primitive".encode(encoding)].decode(
+                encoding
+            )
+            primitive_function = Client.__primitive_value_converters.get(
+                primitive_header
+            )
+            if primitive_function is not None:
+                transformed_parts.append(primitive_function(part))
+            else:
+                transformed_parts.append(part.text)
+        return transformed_parts
+
     @property
     def documents(self):
         if not hasattr(self, "_documents"):
@@ -91,3 +147,37 @@ class Client(requests.Session):
         if not hasattr(self, "_eval"):
             self._eval = EvalManager(self)
         return self._eval
+
+    __primitive_value_converters = {
+        "integer": lambda part: int(part.text),
+        "decimal": lambda part: Decimal(part.text),
+        "boolean": lambda part: ("False" == part.text),
+        "string": lambda part: part.text,
+        "map": lambda part: json.loads(part.text),
+        "element()": lambda part: part.text,
+        "array": lambda part: json.loads(part.text),
+        "array-node()": lambda part: json.loads(part.text),
+        "object-node()": lambda part: Client.__process_object_node_part(part),
+        "document-node()": lambda part: Client.__process_document_node_part(part),
+        "binary()": lambda part: Document(
+            Client.__get_decoded_uri_from_part(part), part.content
+        ),
+    }
+
+    def __get_decoded_uri_from_part(part):
+        encoding = part.encoding
+        return part.headers["X-URI".encode(encoding)].decode(encoding)
+
+    def __process_object_node_part(part):
+        if b"X-URI" in part.headers:
+            return Document(
+                Client.__get_decoded_uri_from_part(part), json.loads(part.text)
+            )
+        else:
+            return json.loads(part.text)
+
+    def __process_document_node_part(part):
+        if b"X-URI" in part.headers:
+            return Document(Client.__get_decoded_uri_from_part(part), part.text)
+        else:
+            return part.text

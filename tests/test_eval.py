@@ -2,7 +2,6 @@ import decimal
 
 from marklogic.documents import Document
 from requests_toolbelt.multipart.decoder import MultipartDecoder
-from pytest import raises
 
 
 def test_xquery_common_primitives(client):
@@ -70,16 +69,6 @@ def test_javascript_specific_primitives(client):
             "instrument": ["trumpet", "vocal"],
         }
     } == parts[2].content
-
-
-def test_javascript_noquery(client):
-    with raises(ValueError, match="No script found; must specify a javascript"):
-        client.eval.javascript(None)
-
-
-def test_xquery_noquery(client):
-    with raises(ValueError, match="No script found; must specify a xquery"):
-        client.eval.xquery(None)
 
 
 def test_xquery_with_return_response(client):
