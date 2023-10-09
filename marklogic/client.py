@@ -127,25 +127,25 @@ class Client(requests.Session):
     @property
     def documents(self):
         if not hasattr(self, "_documents"):
-            self._documents = DocumentManager(self)
+            self._documents = DocumentManager(session=self)
         return self._documents
 
     @property
     def rows(self):
         if not hasattr(self, "_rows"):
-            self._rows = RowManager(self)
+            self._rows = RowManager(session=self)
         return self._rows
 
     @property
     def transactions(self):
         if not hasattr(self, "_transactions"):
-            self._transactions = TransactionManager(self)
+            self._transactions = TransactionManager(session=self)
         return self._transactions
 
     @property
     def eval(self):
         if not hasattr(self, "_eval"):
-            self._eval = EvalManager(self)
+            self._eval = EvalManager(session=self)
         return self._eval
 
     __primitive_value_converters = {
