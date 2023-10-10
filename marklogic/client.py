@@ -112,16 +112,14 @@ class Client(requests.Session):
         transformed_parts = []
         for part in parts:
             encoding = part.encoding
-            primitive_header = part.headers["X-Primitive".encode(encoding)].decode(
-                encoding
-            )
-            primitive_function = Client.__primitive_value_converters.get(
-                primitive_header
-            )
+            header = part.headers["X-Primitive".encode(encoding)].decode(encoding)
+            primitive_function = Client.__primitive_value_converters.get(header)
             if primitive_function is not None:
                 transformed_parts.append(primitive_function(part))
             else:
-                transformed_parts.append(part.text)
+                # Return the binary created by requests_toolbelt so we don't get an
+                # error trying to convert it to something else.
+                transformed_parts.append(part.content)
         return transformed_parts
 
     @property
@@ -159,6 +157,9 @@ class Client(requests.Session):
         "array-node()": lambda part: json.loads(part.text),
         "object-node()": lambda part: Client.__process_object_node_part(part),
         "document-node()": lambda part: Client.__process_document_node_part(part),
+        # It appears that binary() will only be returned for a binary node retrieved
+        # from the database, and thus an X-URI will always exist. Have not found a
+        # scenario that indicates otherwise.
         "binary()": lambda part: Document(
             Client.__get_decoded_uri_from_part(part), part.content
         ),

@@ -1,0 +1,27 @@
+{
+    "role-name": "python-docs-role",
+    "description": "Used by the documentation, not by tests",
+    "role": [
+        "rest-extension-user",
+        "rest-reader",
+        "rest-writer",
+        "tde-admin"
+    ],
+    "privilege": [
+        {
+            "privilege-name": "xdbc:eval",
+            "action": "http://marklogic.com/xdmp/privileges/xdbc-eval",
+            "kind": "execute"
+        },
+        {
+            "privilege-name": "xdbc:invoke",
+            "action": "http://marklogic.com/xdmp/privileges/xdbc-invoke",
+            "kind": "execute"
+        },
+        {
+            "privilege-name": "xdmp:eval-in",
+            "action": "http://marklogic.com/xdmp/privileges/xdmp-eval-in",
+            "kind": "execute"
+        }
+    ]
+}

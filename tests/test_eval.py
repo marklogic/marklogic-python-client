@@ -108,6 +108,20 @@ def test_javascript_script(client):
     assert [[]] == parts
 
 
+def test_base64Binary(client):
+    parts = client.eval.xquery('xs:base64Binary(doc("/musicians/logo.png"))')
+    assert len(parts) == 1
+    assert type(parts[0]) is bytes
+
+
+def test_hexBinary(client):
+    # No idea what this value is, found it in a DHF test.
+    b = "3f3c6d78206c657673726f693d6e3122302e20226e656f636964676e223d54552d4622383e3f"
+    parts = client.eval.xquery(f"xs:hexBinary('{b}')")
+    assert len(parts) == 1
+    assert type(parts[0]) is bytes
+
+
 def __verify_common_primitives(parts):
     assert type(parts[0]) is str
     assert "A" == parts[0]
