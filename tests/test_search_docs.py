@@ -3,6 +3,7 @@ import json
 from requests import Response
 
 from marklogic import Client
+from marklogic.documents import multipart_response_to_documents
 
 
 def test_structured_json_string_query(client: Client):
@@ -71,6 +72,15 @@ def test_search_options(client: Client):
     assert docs[0].uri == "/doc2.xml"
     docs = client.documents.search(q="hello:no matches", options="test-options")
     assert len(docs) == 0
+
+
+def test_search_with_original_response(client: Client):
+    response = client.documents.search(
+        q="hello:world", options="test-options", return_response=True
+    )
+    docs = multipart_response_to_documents(response)
+    assert len(docs) == 1
+    assert docs[0].uri == "/doc2.xml"
 
 
 def test_collection(client: Client):

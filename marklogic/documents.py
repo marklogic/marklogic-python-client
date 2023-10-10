@@ -399,6 +399,7 @@ class DocumentManager:
         uris: Union[str, list[str]],
         categories: list[str] = None,
         tx: Transaction = None,
+        return_response: bool = False,
         **kwargs,
     ) -> Union[list[Document], Response]:
         """
@@ -428,7 +429,7 @@ class DocumentManager:
 
         return (
             multipart_response_to_documents(response)
-            if response.status_code == 200
+            if response.status_code == 200 and not return_response
             else response
         )
 
@@ -442,6 +443,7 @@ class DocumentManager:
         options: str = None,
         collections: list[str] = None,
         tx: Transaction = None,
+        return_response: bool = False,
         **kwargs,
     ) -> Union[list[Document], Response]:
         """
@@ -512,6 +514,6 @@ class DocumentManager:
 
         return (
             multipart_response_to_documents(response)
-            if response.status_code == 200
+            if response.status_code == 200 and not return_response
             else response
         )

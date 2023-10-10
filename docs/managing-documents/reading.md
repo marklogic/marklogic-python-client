@@ -114,6 +114,12 @@ print(docs)
 Please see [the application developer's guide](https://docs.marklogic.com/guide/rest-dev/documents#id_80116)
 for more information on reading documents.
 
+## Returning the original HTTP response
+
+The `client.documents.read` method also accepts a `return_response` argument. When that
+argument is set to `True`, the original response is returned. This can be useful for custom
+processing of the response or debugging requests.
+
 ## Error handling
 
 If the `client.documents.read` method receives an HTTP response with a status code of 200, then the client will return

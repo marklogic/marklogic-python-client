@@ -137,6 +137,13 @@ def test_read_with_basic_client(basic_client: Client):
     assert {"hello": "world"} == doc.content
 
 
+def test_read_with_original_response(basic_client: Client):
+    response = basic_client.documents.read("/doc1.json", return_response=True)
+    assert b'--ML_BOUNDARY' in response.content
+    assert b'filename="/doc1.json"' in response.content
+    assert b'{"hello":"world"}' in response.content
+
+
 def test_not_rest_user(not_rest_user_client: Client):
     response: Response = not_rest_user_client.documents.read(
         ["/doc1.json", "/doc2.xml"]
