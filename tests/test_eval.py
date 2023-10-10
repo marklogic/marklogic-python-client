@@ -1,21 +1,20 @@
 import decimal
 
 from marklogic.documents import Document
+from pytest import raises
 from requests_toolbelt.multipart.decoder import MultipartDecoder
 
 
 def test_xquery_common_primitives(client):
-    parts = client.eval.xquery(
-        """(
-        'A', 1, 1.1, fn:false(), fn:doc('/musicians/logo.png'))
-        """
+    parts = client.eval(
+        xquery="('A', 1, 1.1, fn:false(), fn:doc('/musicians/logo.png'))"
     )
     __verify_common_primitives(parts)
 
 
 def test_javascript_common_primitives(client):
-    parts = client.eval.javascript(
-        """xdmp.arrayValues([
+    parts = client.eval(
+        javascript="""xdmp.arrayValues([
         'A', 1, 1.1, false, fn.doc('/musicians/logo.png')
         ])"""
     )
@@ -23,8 +22,8 @@ def test_javascript_common_primitives(client):
 
 
 def test_xquery_specific_primitives(client):
-    parts = client.eval.xquery(
-        """(
+    parts = client.eval(
+        xquery="""(
         <hello>world</hello>,
         object-node {'A': 'a'},
         fn:doc('/doc2.xml'),
@@ -47,8 +46,8 @@ def test_xquery_specific_primitives(client):
 
 
 def test_javascript_specific_primitives(client):
-    parts = client.eval.javascript(
-        """xdmp.arrayValues([
+    parts = client.eval(
+        javascript="""xdmp.arrayValues([
         {'A': 'a'},
         ['Z', 'Y', 1],
         fn.head(cts.search('Armstrong'))
@@ -72,44 +71,50 @@ def test_javascript_specific_primitives(client):
 
 
 def test_xquery_with_return_response(client):
-    response = client.eval.xquery("('A', 1, 1.1, fn:false())", return_response=True)
+    response = client.eval(xquery="('A', 1, 1.1, fn:false())", return_response=True)
     assert 200 == response.status_code
     parts = MultipartDecoder.from_response(response).parts
     assert 4 == len(parts)
 
 
 def test_xquery_vars(client):
-    vars = {"word1": "hello", "word2": "world"}
     script = """
     xquery version "1.0-ml";
     declare variable $word1 as xs:string external;
     declare variable $word2 as xs:string external;
     fn:concat($word1, " ", $word2)
     """
-    parts = client.eval.xquery(script, vars)
+    parts = client.eval(xquery=script, vars={"word1": "hello", "word2": "world"})
     assert type(parts[0]) is str
     assert "hello world" == parts[0]
 
 
 def test_javascript_vars(client):
-    vars = {"word1": "hello", "word2": "world"}
-    parts = client.eval.javascript("xdmp.arrayValues([word1, word2])", vars)
+    parts = client.eval(
+        javascript="xdmp.arrayValues([word1, word2])",
+        vars={"word1": "hello", "word2": "world"},
+    )
     assert type(parts[0]) is str
     assert "hello" == parts[0]
 
 
 def test_xquery_empty_sequence(client):
-    parts = client.eval.xquery("()")
-    assert parts is None
+    parts = client.eval(xquery="()")
+    assert [] == parts
 
 
-def test_javascript_script(client):
-    parts = client.eval.javascript("[]")
+def test_javascript_empty_array(client):
+    parts = client.eval(javascript="[]")
     assert [[]] == parts
 
 
+def test_javascript_empty_sequence(client):
+    parts = client.eval(javascript="Sequence.from([])")
+    assert [] == parts
+
+
 def test_base64Binary(client):
-    parts = client.eval.xquery('xs:base64Binary(doc("/musicians/logo.png"))')
+    parts = client.eval(xquery='xs:base64Binary(doc("/musicians/logo.png"))')
     assert len(parts) == 1
     assert type(parts[0]) is bytes
 
@@ -117,9 +122,16 @@ def test_base64Binary(client):
 def test_hexBinary(client):
     # No idea what this value is, found it in a DHF test.
     b = "3f3c6d78206c657673726f693d6e3122302e20226e656f636964676e223d54552d4622383e3f"
-    parts = client.eval.xquery(f"xs:hexBinary('{b}')")
+    parts = client.eval(xquery=f"xs:hexBinary('{b}')")
     assert len(parts) == 1
     assert type(parts[0]) is bytes
+
+
+def test_no_script(client):
+    with raises(
+        ValueError, match="Must define either 'javascript' or 'xquery' argument."
+    ):
+        client.eval(vars={})
 
 
 def __verify_common_primitives(parts):
