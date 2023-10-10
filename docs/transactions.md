@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Managing transactions
-nav_order: 5
+nav_order: 6
 ---
 
 The [MarkLogic REST transactions service](https://docs.marklogic.com/REST/client/transaction-management)
