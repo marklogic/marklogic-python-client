@@ -149,4 +149,3 @@ selected via a `format` argument. The following table defined the possible value
 | `xml` | XML document defining the columns and rows. |
 | `csv` | CSV text with the first row defining the columns. |
 | `json-seq` | A [line-delimited JSON sequence](https://datatracker.ietf.org/doc/html/rfc7464) with the first row defining the columns. |
-| `mixed` | TODO Seems like we should remove this as it does the same thing as "return_response". |

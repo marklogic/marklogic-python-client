@@ -44,11 +44,11 @@ def test_dsl_json_seq(client):
     verify_four_musicians_are_returned_in_json_seq(data)
 
 
-def test_dsl_mixed(client):
-    response = client.rows.query(dsl_query, format="mixed")
-    verify_four_musicians_are_returned_in_json(
-        response.json(), "test.musician.lastName"
-    )
+def test_invalid_format(client):
+    with raises(
+        ValueError, match="Invalid value for 'format' argument: invalid; must be one of"
+    ):
+        client.rows.query(dsl_query, format="invalid")
 
 
 def test_serialized_default(client):

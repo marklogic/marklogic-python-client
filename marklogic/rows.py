@@ -8,7 +8,6 @@ https://docs.marklogic.com/REST/client/row-management.
 
 
 class RowManager:
-
     def __init__(self, session: Session):
         self._session = session
 
@@ -17,7 +16,6 @@ class RowManager:
         "xml": "application/xml",
         "csv": "text/csv",
         "json-seq": "application/json-seq",
-        "mixed": "application/xml, multipart/mixed",
     }
 
     __query_format_switch = {
@@ -25,7 +23,6 @@ class RowManager:
         "xml": lambda response: response.text,
         "csv": lambda response: response.text,
         "json-seq": lambda response: response.text,
-        "mixed": lambda response: response,
     }
 
     def query(
@@ -37,7 +34,7 @@ class RowManager:
         graphql: str = None,
         format: str = "json",
         return_response: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Sends a query to an endpoint at the MarkLogic rows service defined at
@@ -56,8 +53,9 @@ class RowManager:
         :param graphql: a GraphQL query string. This is the query string
         only, not the entire query JSON object. See
         https://docs.marklogic.com/REST/POST/v1/rows/graphql for more information.
-        :param format: defines the format of the response. If a GraphQL query is
-        submitted, this parameter is ignored and a JSON response is always returned.
+        :param format: defines the format of the response. Valid values are "json",
+        "xml", "csv", and "json-seq". If a GraphQL query is submitted, this parameter
+        is ignored and a JSON response is always returned.
         :param return_response: boolean specifying if the entire original response
         object should be returned (True) or if only the data should be returned (False)
         upon a success (2xx) response. Note that if the status code of the response is
@@ -73,7 +71,14 @@ class RowManager:
             request_info = self.__get_request_info(dsl, plan, sql, sparql)
             data = request_info["data"]
             headers["Content-Type"] = request_info["content-type"]
-            headers["Accept"] = RowManager.__accept_switch.get(format)
+            if format:
+                value = RowManager.__accept_switch.get(format)
+                if value is None:
+                    msg = f"Invalid value for 'format' argument: {format}; "
+                    msg += "must be one of 'json', 'xml', 'csv', or 'json-seq'."
+                    raise ValueError(msg)
+                else:
+                    headers["Accept"] = value
 
         response = self._session.post(path, headers=headers, data=data, **kwargs)
         if response.ok and not return_response:
