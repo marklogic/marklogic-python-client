@@ -3,7 +3,7 @@ import requests
 
 from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
-from marklogic.impl.eval import process_multipart_mixed_response
+from marklogic.internal.eval import process_multipart_mixed_response
 from marklogic.rows import RowManager
 from marklogic.transactions import TransactionManager
 from requests.auth import HTTPDigestAuth
