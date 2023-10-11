@@ -100,7 +100,8 @@ class Client(requests.Session):
         """
         Send a script to MarkLogic via a POST to the endpoint
         defined at https://docs.marklogic.com/REST/POST/v1/eval. Must define either
-        'javascript' or 'xquery'.
+        'javascript' or 'xquery'. Returns a list, unless no content is returned in
+        which case None is returned.
 
         :param javascript: a JavaScript script
         :param xquery: an XQuery script
@@ -141,7 +142,8 @@ class Client(requests.Session):
         """
         Send a script (XQuery or JavaScript) and possibly a dict of vars
         to MarkLogic via a POST to the endpoint defined at
-        https://docs.marklogic.com/REST/POST/v1/eval.
+        https://docs.marklogic.com/REST/POST/v1/eval. Returns a list, unless no content
+        is returned in which case None is returned.
 
         :param module: The URI of a module in the modules database of the app server
         :param vars: a dict containing variables to include

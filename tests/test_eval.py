@@ -100,7 +100,7 @@ def test_javascript_vars(client):
 
 def test_xquery_empty_sequence(client):
     parts = client.eval(xquery="()")
-    assert [] == parts
+    assert parts is None
 
 
 def test_javascript_empty_array(client):
@@ -110,7 +110,7 @@ def test_javascript_empty_array(client):
 
 def test_javascript_empty_sequence(client):
     parts = client.eval(javascript="Sequence.from([])")
-    assert [] == parts
+    assert parts is None
 
 
 def test_base64Binary(client):

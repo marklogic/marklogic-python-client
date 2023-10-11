@@ -94,7 +94,7 @@ class RowManager:
         )
         if response.ok and not return_response:
             if response_has_no_content(response):
-                return []
+                return None
             return (
                 response.json()
                 if graphql

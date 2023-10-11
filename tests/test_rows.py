@@ -17,7 +17,7 @@ def test_dsl_default(client):
 def test_no_rows_returned(client):
     query = 'op.fromView("test", "musician").where(op.eq(op.col("lastName"), "Smith"))'
     results = client.rows.query(query)
-    assert [] == results
+    assert results is None
 
 
 def test_dsl_default_return_response(client):
@@ -98,7 +98,7 @@ def test_transaction(client):
         query = f'op.fromView("test", "musician")'
         query = f'{query}.where(op.eq(op.col("lastName"), "{lastName}"))'
         results = client.rows.query(query, tx=tx)
-        assert len(results) == 0
+        assert results is None
 
         perms = {"python-tester": ["read", "update"]}
         doc = Document(uri, content, permissions=perms)
@@ -109,7 +109,7 @@ def test_transaction(client):
 
         client.delete("/v1/documents", params={"uri": uri, "txid": tx.id})
         results = client.rows.query(query, tx=tx)
-        assert len(results) == 0
+        assert results is None
 
 
 def verify_four_musicians_are_returned_in_json(data, column_name):
