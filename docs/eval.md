@@ -66,7 +66,8 @@ assert results[1]["doc"] == 2
 ```
 
 The following table describes how each MarkLogic type is associated with a Python data type. For any 
-MarkLogic type not listed in the table, the value is not converted and will be of type `bytes`. 
+MarkLogic type not listed in the table, such as `hexBinary` and `base64Binary`, the value is not converted and will be 
+of type `bytes`. 
 
 | MarkLogic type | Python type | 
 | --- | --- |
@@ -78,13 +79,13 @@ MarkLogic type not listed in the table, the value is not converted and will be o
 | element() | str |
 | array | list |
 | array-node() | list |
-| object-node() | dict or marklogic.documents.Document |
-| document-node() | str or marklogic.documents.Document |
-| binary() | marklogic.documents.Document | 
+| object-node() | dict or `marklogic.documents.Document` |
+| document-node() | str or `marklogic.documents.Document` |
+| binary() | bytes or `marklogic.documents.Document` | 
 
-For the `object-node()` and `document-node()` entries in the above table, a `marklogic.documents.Document` instance 
-will be returned if the MarkLogic value is associated with a URI via the multipart `X-URI` header. Otherwise, a `dict`
-or `str` is returned respectively.
+For the `object-node()`, `document-node()`, and `binary()` entries in the above table, a 
+`marklogic.documents.Document` instance will be returned if the value is associated with a URI via 
+the multipart `X-URI` header. Otherwise, a value of type `dict`, `str`, or `bytes` is returned respectively.
 
 ## Returning the original HTTP response
 

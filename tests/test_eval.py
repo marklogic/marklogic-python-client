@@ -127,6 +127,12 @@ def test_hexBinary(client):
     assert type(parts[0]) is bytes
 
 
+def test_binary(client):
+    parts = client.eval(xquery='binary{xs:hexBinary("00")}')
+    assert len(parts) == 1
+    assert type(parts[0]) is bytes
+
+
 def test_no_script(client):
     with raises(
         ValueError, match="Must define either 'javascript' or 'xquery' argument."
