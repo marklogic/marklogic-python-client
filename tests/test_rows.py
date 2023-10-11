@@ -11,6 +11,12 @@ def test_dsl_default(client):
     verify_four_musicians_are_returned_in_json(data, "test.musician.lastName")
 
 
+def test_no_rows_returned(client):
+    query = 'op.fromView("test", "musician").where(op.eq(op.col("lastName"), "Smith"))'
+    results = client.rows.query(query)
+    assert [] == results
+
+
 def test_dsl_default_return_response(client):
     response = client.rows.query(dsl_query, return_response=True)
     assert 200 == response.status_code
