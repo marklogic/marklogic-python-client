@@ -56,6 +56,16 @@ And you can then start sending requests with the client - for example:
     r = client.get("/v1/search?format=json&pageLength=2")
     r.json()
 
+You can also use the scripts in the `./shell` directory to initialize a client. The following initializes a client
+that connects to this project's test application:
+
+    python -i shell/test_app.py
+
+And this initializes a client that connects to the OOTB App-Services app server, which is used for examples in this 
+project's documentation:
+
+    python -i shell/docs.py
+
 ## Testing the documentation locally
 
 The docs for this project are stored in the `./docs` directory as a set of Markdown files. These are published via
