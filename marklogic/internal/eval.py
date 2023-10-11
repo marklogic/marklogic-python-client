@@ -2,6 +2,7 @@ import json
 
 from decimal import Decimal
 from marklogic.documents import Document
+from marklogic.internal.util import response_has_no_content
 from requests import Response
 from requests_toolbelt.multipart.decoder import MultipartDecoder
 
@@ -18,9 +19,7 @@ def process_multipart_mixed_response(response: Response) -> list:
     :param response: The original multipart/mixed response from a call to a
     MarkLogic server.
     """
-
-    # The presence of this header indicates that the call returned an empty sequence.
-    if "Content-Length" in response.headers:
+    if response_has_no_content(response):
         return []
 
     parts = MultipartDecoder.from_response(response).parts

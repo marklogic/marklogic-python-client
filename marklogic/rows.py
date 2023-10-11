@@ -1,5 +1,7 @@
 import json
 from requests import Session
+from marklogic.internal.util import response_has_no_content
+
 
 """
 Defines classes to simplify usage of the REST rows service defined at
@@ -82,6 +84,8 @@ class RowManager:
 
         response = self._session.post(path, headers=headers, data=data, **kwargs)
         if response.ok and not return_response:
+            if response_has_no_content(response):
+                return []
             return (
                 response.json()
                 if graphql
