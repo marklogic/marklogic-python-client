@@ -20,7 +20,7 @@ def process_multipart_mixed_response(response: Response) -> list:
     MarkLogic server.
     """
     if response_has_no_content(response):
-        return []
+        return None
 
     parts = MultipartDecoder.from_response(response).parts
     transformed_parts = []
