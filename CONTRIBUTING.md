@@ -35,7 +35,8 @@ To run an individual test method:
 
 Note that due to the pytest config in the `pyproject.toml` file, all 
 [Python logging](https://docs.python.org/3/howto/logging.html) should appear immediately
-as tests are executed.
+as tests are executed. If you are using VSCode, you can see the logging by selecting 
+"Python Test Log" in the "Output" panel.
 
 ## Testing the client in a Python shell
 

@@ -33,6 +33,18 @@ def test_invoke_with_return_response(client):
     assert 5 == len(parts)
 
 
+def test_transaction(client):
+    locks = None
+    with client.transactions.create() as tx:
+        client.invoke("/read_doc1.sjs", tx=tx)
+        client.invoke("/read_doc2.xqy", tx=tx)
+        locks = client.eval(javascript="xdmp.transactionLocks()", tx=tx)
+
+    read_locks = locks[0]["read"]
+    assert "/doc1.json" in read_locks
+    assert "/doc2.xml" in read_locks
+
+
 def __verify_invoke_with_vars(parts):
     assert "hello" == parts[0]
     assert "world" == parts[1]
