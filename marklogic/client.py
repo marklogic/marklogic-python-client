@@ -5,7 +5,7 @@ from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
 from marklogic.internal.eval import process_multipart_mixed_response
 from marklogic.rows import RowManager
-from marklogic.transactions import TransactionManager
+from marklogic.transactions import TransactionManager, Transaction
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -93,6 +93,7 @@ class Client(requests.Session):
         javascript: str = None,
         xquery: str = None,
         vars: dict = None,
+        tx: Transaction = None,
         return_response: bool = False,
         **kwargs,
     ):
@@ -104,6 +105,7 @@ class Client(requests.Session):
         :param javascript: a JavaScript script
         :param xquery: an XQuery script
         :param vars: a dict containing variables to include
+        :param tx: optional REST transaction in which to service this request.
         :param return_response: boolean specifying if the entire original response
         object should be returned (True) or if only the data should be returned (False)
         upon a success (2xx) response. Note that if the status code of the response is
@@ -118,7 +120,10 @@ class Client(requests.Session):
             raise ValueError("Must define either 'javascript' or 'xquery' argument.")
         if vars:
             data["vars"] = json.dumps(vars)
-        response = self.post("v1/eval", data=data, **kwargs)
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+        response = self.post("v1/eval", data=data, params=params, **kwargs)
         return (
             process_multipart_mixed_response(response)
             if response.status_code == 200 and not return_response
@@ -126,7 +131,12 @@ class Client(requests.Session):
         )
 
     def invoke(
-        self, module: str, vars: dict = None, return_response: bool = False, **kwargs
+        self,
+        module: str,
+        vars: dict = None,
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
     ):
         """
         Send a script (XQuery or JavaScript) and possibly a dict of vars
@@ -135,6 +145,7 @@ class Client(requests.Session):
 
         :param module: The URI of a module in the modules database of the app server
         :param vars: a dict containing variables to include
+        :param tx: optional REST transaction in which to service this request.
         :param return_response: boolean specifying if the entire original response
         object should be returned (True) or if only the data should be returned (False)
         upon a success (2xx) response. Note that if the status code of the response is
@@ -143,7 +154,10 @@ class Client(requests.Session):
         data = {"module": module}
         if vars:
             data["vars"] = json.dumps(vars)
-        response = self.post("v1/invoke", data=data, **kwargs)
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+        response = self.post("v1/invoke", data=data, params=params, **kwargs)
         return (
             process_multipart_mixed_response(response)
             if response.status_code == 200 and not return_response

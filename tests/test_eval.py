@@ -140,6 +140,18 @@ def test_no_script(client):
         client.eval(vars={})
 
 
+def test_transaction(client):
+    locks = None
+    with client.transactions.create() as tx:
+        client.eval(javascript="cts.doc('/doc1.json')", tx=tx)
+        client.eval(javascript="cts.doc('/doc2.xml')", tx=tx)
+        locks = client.eval(javascript="xdmp.transactionLocks()", tx=tx)
+
+    read_locks = locks[0]["read"]
+    assert "/doc1.json" in read_locks
+    assert "/doc2.xml" in read_locks
+
+
 def __verify_common_primitives(parts):
     assert type(parts[0]) is str
     assert "A" == parts[0]

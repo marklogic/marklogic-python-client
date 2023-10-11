@@ -1,4 +1,7 @@
 from pytest import raises
+from marklogic.documents import Document
+import uuid
+
 
 dsl_query = 'op.fromView("test","musician").orderBy(op.col("lastName"))'
 serialized_query = '{"$optic":{"ns":"op", "fn":"operators", "args":[{"ns":"op", "fn":"from-view", "args":["test", "musician"]}, {"ns":"op", "fn":"order-by", "args":[{"ns":"op", "fn":"col", "args":["lastName"]}]}]}}'
@@ -78,6 +81,35 @@ def test_no_query_parameter_provided(client):
         match="No query found; must specify one of: dsl, plan, sql, or sparql",
     ):
         client.rows.query()
+
+
+def test_transaction(client):
+    lastName = str(uuid.uuid4())
+    content = {
+        "musician": {
+            "lastName": lastName,
+            "firstName": "DoesntMatter",
+            "dob": "2000-01-01",
+        }
+    }
+    uri = "/temp/musician5.json"
+
+    with client.transactions.create() as tx:
+        query = f'op.fromView("test", "musician")'
+        query = f'{query}.where(op.eq(op.col("lastName"), "{lastName}"))'
+        results = client.rows.query(query, tx=tx)
+        assert len(results) == 0
+
+        perms = {"python-tester": ["read", "update"]}
+        doc = Document(uri, content, permissions=perms)
+        client.documents.write(doc, tx=tx)
+
+        results = client.rows.query(query, tx=tx)
+        assert len(results["rows"]) == 1
+
+        client.delete("/v1/documents", params={"uri": uri, "txid": tx.id})
+        results = client.rows.query(query, tx=tx)
+        assert len(results) == 0
 
 
 def verify_four_musicians_are_returned_in_json(data, column_name):

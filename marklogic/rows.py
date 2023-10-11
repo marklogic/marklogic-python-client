@@ -1,5 +1,6 @@
 import json
 from requests import Session
+from marklogic.transactions import Transaction
 from marklogic.internal.util import response_has_no_content
 
 
@@ -35,6 +36,7 @@ class RowManager:
         sparql: str = None,
         graphql: str = None,
         format: str = "json",
+        tx: Transaction = None,
         return_response: bool = False,
         **kwargs,
     ):
@@ -58,6 +60,7 @@ class RowManager:
         :param format: defines the format of the response. Valid values are "json",
         "xml", "csv", and "json-seq". If a GraphQL query is submitted, this parameter
         is ignored and a JSON response is always returned.
+        :param tx: optional REST transaction in which to service this request.
         :param return_response: boolean specifying if the entire original response
         object should be returned (True) or if only the data should be returned (False)
         upon a success (2xx) response. Note that if the status code of the response is
@@ -82,7 +85,13 @@ class RowManager:
                 else:
                     headers["Accept"] = value
 
-        response = self._session.post(path, headers=headers, data=data, **kwargs)
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+
+        response = self._session.post(
+            path, headers=headers, data=data, params=params, **kwargs
+        )
         if response.ok and not return_response:
             if response_has_no_content(response):
                 return []
