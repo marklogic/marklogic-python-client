@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Managing transactions
-nav_order: 6
+nav_order: 5
 ---
 
 The [MarkLogic REST transactions service](https://docs.marklogic.com/REST/client/transaction-management)
@@ -76,7 +76,9 @@ with client.transactions.create() as tx:
 
 ## Getting transaction status
 
-You can get the status of the transaction via the `get_status()` function:
+You can get the 
+[status of the transaction](https://docs.marklogic.com/REST/GET/v1/transactions/[txid]) 
+via the `get_status()` function:
 
 ```
 with client.transactions.create() as tx:

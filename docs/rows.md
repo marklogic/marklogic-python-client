@@ -1,13 +1,13 @@
 ---
 layout: default
 title: Querying for rows
-nav_order: 4
+nav_order: 6
 ---
 
 
 The [MarkLogic REST rows service](https://docs.marklogic.com/REST/client/row-management) supports
-operations for querying for rows via a variety of languages. The MarkLogic Python client simplifies submitting queries
-for rows and converting the response into a useful data structure.
+operations for querying for rows via several query languages. The MarkLogic Python client simplifies submitting queries
+for rows and converting responses into useful data structures.
 
 ## Setup
 
@@ -85,8 +85,9 @@ You can use a named argument as well:
 client.rows.query(dsl="op.fromView('example', 'musician')")
 ```
 
-For some use cases, it may be helpful to capture an Optic query in its serialized form. Such a query can then be 
-submitted via the `plan` argument:
+For some use cases, it may be helpful to capture an Optic query 
+[as a serialized plan](https://docs.marklogic.com/guide/app-dev/OpticAPI#id_11208). 
+A serialized plan can then be submitted via the `plan` argument:
 
 ```
 plan = '{"$optic":{"ns":"op", "fn":"operators", "args":[{"ns":"op", "fn":"from-view", "args":["example", "musician"]}]}}'
@@ -94,7 +95,7 @@ client.rows.query(plan=plan)
 ```
 
 Optic supports many different types of queries and operations; please
-[see the documentation]((https://docs.marklogic.com/guide/app-dev/OpticAPI#id_35559)) for further information on 
+[see the documentation](https://docs.marklogic.com/guide/app-dev/OpticAPI#id_35559) for further information on 
 much more powerful and flexible queries than shown in these examples, which are intended solely for demonstration of 
 how to submit an Optic query.
 
