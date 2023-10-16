@@ -157,9 +157,15 @@ for more information on searching documents.
 
 ## Returning the original HTTP response
 
-The `client.documents.search` method also accepts a `return_response` argument. When
-that argument is set to `True`, the original response is returned. This can be useful for
-custom processing of the response or debugging requests.
+Starting in the 1.1.0 release, the `client.documents.search` method accepts a 
+`return_response` argument. When that argument is set to `True`, the original response 
+is returned. This can be useful for custom processing of the response or debugging requests.
+
+## Referencing a transaction
+
+Starting in the 1.1.0 release, you can reference a 
+[REST API transaction](https://docs.marklogic.com/REST/client/transaction-management) via the `tx` 
+argument. See [the guide on transactions](../transactions.md) for further information.
 
 ## Error handling
 

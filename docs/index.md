@@ -31,6 +31,6 @@ If you wish to try these examples on your own installation of MarkLogic, please 
 for instructions on creating this user. 
 
 Otherwise, please see the [guide on creating a client](creating-client.md) for more information on connecting to a 
-MarkLogic REST API instance. The [guide on managing documents](managing-documents/managing-documents.md) provides
-more information on how the client simplifies writing and reading multiple documents in a single request.
+MarkLogic REST API instance. Then choose a guide from the navigation on the left to see how the client can simplify
+your application's interactions with the MarkLogic REST API.
 
