@@ -150,3 +150,32 @@ selected via a `format` argument. The following table defined the possible value
 | `xml` | XML document defining the columns and rows. |
 | `csv` | CSV text with the first row defining the columns. |
 | `json-seq` | A [line-delimited JSON sequence](https://datatracker.ietf.org/doc/html/rfc7464) with the first row defining the columns. |
+
+## Integration with pandas
+
+[pandas](https://pandas.pydata.org/) is a widely used data analysis tool. A 
+[pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html) can easily be 
+constructed by retrieving rows via `format=csv` and invoking 
+[`pandas.read_csv`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html).
+
+The following example assumes that you have pandas available in your Python shell already. If not, exit your shell, 
+run `pip install pandas`, and then restart your shell, re-creating the `client` object as shown at the top of this 
+page.
+
+```
+import io
+import pandas
+
+rows = client.rows.query("op.fromView('example', 'musician')", format="csv")
+df = pandas.read_csv(io.StringIO(rows))
+```
+
+Printing the `df` object will yield the following:
+
+```
+  example.musician.lastName example.musician.firstName example.musician.dob
+0                     Byron                        Don           1958-11-08
+1                     Davis                      Miles           1926-05-26
+2                 Armstrong                      Louis           1901-08-04
+3                  Coltrane                       John           1926-09-23
+```
