@@ -1,0 +1,28 @@
+{
+    "template": {
+      "context": "/musician",
+      "rows": [
+        {
+          "schemaName": "test",
+          "viewName": "musician",
+          "columns": [
+            {
+              "name": "lastName",
+              "scalarType": "string",
+              "val": "lastName"
+            },
+            {
+              "name": "firstName",
+              "scalarType": "string",
+              "val": "firstName"
+            },
+            {
+              "name": "dob",
+              "scalarType": "date",
+              "val": "dob"
+            }
+          ]
+        }
+      ]
+    }
+  }

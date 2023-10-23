@@ -150,6 +150,13 @@ response = client.documents.write(Document("/doc1.json", {"doc": 1}, permissions
 Please see [the application developer's guide](https://docs.marklogic.com/guide/rest-dev/documents#id_11953) for 
 more information on writing documents.
 
+## Referencing a transaction
+
+Starting in the 1.1.0 release, you can reference a 
+[REST API transaction](https://docs.marklogic.com/REST/client/transaction-management) via the `tx` 
+argument. See [the guide on transactions](../transactions.md) for further information.
+
+
 ## Error handling
 
 Because the `client.documents.write` method returns a `requests Response` object, any error that occurs during 

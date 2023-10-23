@@ -35,7 +35,8 @@ To run an individual test method:
 
 Note that due to the pytest config in the `pyproject.toml` file, all 
 [Python logging](https://docs.python.org/3/howto/logging.html) should appear immediately
-as tests are executed.
+as tests are executed. If you are using VSCode, you can see the logging by selecting 
+"Python Test Log" in the "Output" panel.
 
 ## Testing the client in a Python shell
 
@@ -55,6 +56,16 @@ And you can then start sending requests with the client - for example:
 
     r = client.get("/v1/search?format=json&pageLength=2")
     r.json()
+
+You can also use the scripts in the `./shell` directory to initialize a client. The following initializes a client
+that connects to this project's test application:
+
+    python -i shell/test_app.py
+
+And this initializes a client that connects to the OOTB App-Services app server, which is used for examples in this 
+project's documentation:
+
+    python -i shell/docs.py
 
 ## Testing the documentation locally
 

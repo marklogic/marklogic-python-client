@@ -1,0 +1,8 @@
+{
+    "user-name": "python-user",
+    "password": "pyth0n",
+    "description": "Used by the documentation, not by tests",
+    "role": [
+        "python-docs-role"
+    ]
+}

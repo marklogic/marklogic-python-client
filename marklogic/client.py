@@ -1,6 +1,11 @@
+import json
 import requests
+
 from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
+from marklogic.internal.eval import process_multipart_mixed_response
+from marklogic.rows import RowManager
+from marklogic.transactions import TransactionManager, Transaction
 from requests.auth import HTTPDigestAuth
 from urllib.parse import urljoin
 
@@ -68,5 +73,95 @@ class Client(requests.Session):
     @property
     def documents(self):
         if not hasattr(self, "_documents"):
-            self._documents = DocumentManager(self)
+            self._documents = DocumentManager(session=self)
         return self._documents
+
+    @property
+    def rows(self):
+        if not hasattr(self, "_rows"):
+            self._rows = RowManager(session=self)
+        return self._rows
+
+    @property
+    def transactions(self):
+        if not hasattr(self, "_transactions"):
+            self._transactions = TransactionManager(session=self)
+        return self._transactions
+
+    def eval(
+        self,
+        javascript: str = None,
+        xquery: str = None,
+        vars: dict = None,
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
+    ):
+        """
+        Send a script to MarkLogic via a POST to the endpoint
+        defined at https://docs.marklogic.com/REST/POST/v1/eval. Must define either
+        'javascript' or 'xquery'. Returns a list, unless no content is returned in
+        which case None is returned.
+
+        :param javascript: a JavaScript script
+        :param xquery: an XQuery script
+        :param vars: a dict containing variables to include
+        :param tx: optional REST transaction in which to service this request.
+        :param return_response: boolean specifying if the entire original response
+        object should be returned (True) or if only the data should be returned (False)
+        upon a success (2xx) response. Note that if the status code of the response is
+        not 2xx, then the entire response is always returned.
+        """
+        data = {}
+        if javascript:
+            data = {"javascript": javascript}
+        elif xquery:
+            data = {"xquery": xquery}
+        else:
+            raise ValueError("Must define either 'javascript' or 'xquery' argument.")
+        if vars:
+            data["vars"] = json.dumps(vars)
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+        response = self.post("v1/eval", data=data, params=params, **kwargs)
+        return (
+            process_multipart_mixed_response(response)
+            if response.status_code == 200 and not return_response
+            else response
+        )
+
+    def invoke(
+        self,
+        module: str,
+        vars: dict = None,
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
+    ):
+        """
+        Send a script (XQuery or JavaScript) and possibly a dict of vars
+        to MarkLogic via a POST to the endpoint defined at
+        https://docs.marklogic.com/REST/POST/v1/eval. Returns a list, unless no content
+        is returned in which case None is returned.
+
+        :param module: The URI of a module in the modules database of the app server
+        :param vars: a dict containing variables to include
+        :param tx: optional REST transaction in which to service this request.
+        :param return_response: boolean specifying if the entire original response
+        object should be returned (True) or if only the data should be returned (False)
+        upon a success (2xx) response. Note that if the status code of the response is
+        not 2xx, then the entire response is always returned.
+        """
+        data = {"module": module}
+        if vars:
+            data["vars"] = json.dumps(vars)
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+        response = self.post("v1/invoke", data=data, params=params, **kwargs)
+        return (
+            process_multipart_mixed_response(response)
+            if response.status_code == 200 and not return_response
+            else response
+        )

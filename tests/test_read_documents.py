@@ -91,8 +91,9 @@ def test_read_only_collections(client: Client):
 
     doc1 = docs[0]
     assert doc1.uri == "/doc1.json"
-    assert len(doc1.collections) == 1
-    assert doc1.collections[0] == "test-data"
+    assert len(doc1.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
     assert doc1.content is None
     assert doc1.permissions is None
     assert doc1.quality is None
@@ -101,8 +102,9 @@ def test_read_only_collections(client: Client):
 
     doc2 = docs[1]
     assert doc2.uri == "/doc2.xml"
-    assert len(doc2.collections) == 1
-    assert doc2.collections[0] == "test-data"
+    assert len(doc2.collections) == 2
+    assert "test-data" in doc1.collections
+    assert "search-test" in doc1.collections
     assert doc2.content is None
     assert doc2.permissions is None
     assert doc2.quality is None
@@ -133,6 +135,13 @@ def test_read_with_basic_client(basic_client: Client):
     # Just verifies that basic auth works as expected.
     doc = basic_client.documents.read("/doc1.json")[0]
     assert {"hello": "world"} == doc.content
+
+
+def test_read_with_original_response(basic_client: Client):
+    response = basic_client.documents.read("/doc1.json", return_response=True)
+    assert b'--ML_BOUNDARY' in response.content
+    assert b'filename="/doc1.json"' in response.content
+    assert b'{"hello":"world"}' in response.content
 
 
 def test_not_rest_user(not_rest_user_client: Client):
