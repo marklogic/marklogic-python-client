@@ -44,19 +44,31 @@ data type.
 ## Invoking modules
 
 The [v1/invoke REST endpoint](https://docs.marklogic.com/REST/POST/v1/invoke) supports the execution of JavaScript
-and XQuery main modules that have been deployed to your application's modules database. A module can be invoked via
-the client in the following manner:
+and XQuery main modules that have been deployed to your application's modules database. 
+
+If you wish to attempt the examples below (instead of invoking your own modules), first run the following to 
+insert a simple runnable module into the out-of-the-box "Modules" database:
+
+```
+from marklogic.documents import Document
+module = Document('/sample.sjs', 'const doc = {"hello": "world"}; doc', permissions={"rest-reader": ["read", "update", "execute"]})
+client.documents.write(module, params={"database": "Modules"})
+```
+
+A module can be invoked via the client in the following manner:
 
 ```
 # Set the input to the URI of the module you wish to invoke in your application's 
 # modules database.
-client.invoke("/path/to/module.sjs")
+client.invoke("/sample.sjs")
 ```
 
-You can provide variables to your module in the same fashion as when evaluating custom code:
+You can provide variables to your module in the same fashion as when evaluating custom 
+code (the variable will not have any impact on the sample module loaded above; this is
+shown purely to demonstrate how to define variables):
 
 ```
-client.invoke("/path/to/module.sjs", vars={"my_var1": "value1"})
+client.invoke("/sample.sjs", vars={"my_var1": "value1"})
 ```
 
 ## Conversion of data types
