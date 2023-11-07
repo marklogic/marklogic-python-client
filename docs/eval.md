@@ -9,6 +9,12 @@ execution of custom code, whether via an inline script or an existing module in 
 The MarkLogic Python client supports execution of custom code by simplifying the submission of custom code
 and converting the multipart response into more useful Python data types.
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
 ## Setup
 
 The examples below all depend on the instructions in the [setup guide](example-setup.md) having already been performed.
@@ -117,3 +123,17 @@ processing of the response or debugging requests.
 The `client.eval` and `client.invoke` functions both support referencing a 
 [REST API transaction](https://docs.marklogic.com/REST/client/transaction-management) via the `tx` 
 argument. See [the guide on transactions](transactions.md) for further information.
+
+## Providing additional arguments
+
+The `client.eval` and `client.invoke` methods each provide a `**kwargs` argument, so you can pass in any other arguments you would
+normally pass to `requests`. For example:
+
+```
+client.eval(javascript="fn.currentDateTime()", params={"database": "Documents"})
+client.invoke("/sample.sjs", params={"database": "Documents"})
+```
+
+Please see [the eval endpoint documentation](https://docs.marklogic.com/REST/POST/v1/eval) 
+and [the invoke endpoint documentation](https://docs.marklogic.com/REST/POST/v1/invoke) for
+information on additional parameters.

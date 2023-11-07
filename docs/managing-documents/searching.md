@@ -12,6 +12,12 @@ returning content and metadata for each matching document. Similar to reading mu
 HTTP response. The MarkLogic Python client simplifies use of this operation by returning a list of `Document` instances
 via the `client.documents.search` method.
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
