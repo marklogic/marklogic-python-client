@@ -10,6 +10,12 @@ The [GET /v1/documents](https://docs.marklogic.com/REST/GET/v1/documents) endpoi
 reading multiple documents with metadata via a multipart/mixed HTTP response. The MarkLogic Python client simplifies
 handling the response by converting it into a list of `Document` instances via the `client.documents.read` method. 
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
 ## Setup for examples
 
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 

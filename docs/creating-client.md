@@ -11,6 +11,12 @@ The `Client` class is the primary API to interact with in the MarkLogic Python c
 found in both the `Session` class and the `requests` API. You can therefore use a `Client` object in the same manner 
 as you'd use either the `Session` class or the `requests` API.
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
 ## Creating a client
 
 A `Client` instance can be created either by providing a base URL for all requests along with authentication:

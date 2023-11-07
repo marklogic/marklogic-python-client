@@ -9,6 +9,12 @@ The [MarkLogic REST rows service](https://docs.marklogic.com/REST/client/row-man
 operations for querying for rows via several query languages. The MarkLogic Python client simplifies submitting queries
 for rows and converting responses into useful data structures.
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
 ## Setup
 
 The examples below require documents to be loaded along with a 
@@ -179,3 +185,17 @@ Printing the `df` object will yield the following:
 2                 Armstrong                      Louis           1901-08-04
 3                  Coltrane                       John           1926-09-23
 ```
+
+## Providing additional arguments
+
+The `client.rows.query` method provides a `**kwargs` argument, so you can pass in any other arguments you would
+normally pass to `requests`. For example:
+
+```
+response = client.rows.query("op.fromView('example', 'musician')", params={"database": "Documents"})
+```
+
+Please see [the rows endpoint documentation](https://docs.marklogic.com/REST/POST/v1/rows) for 
+information on additional parameters. If you are submitting a GraphQL query, then see 
+[the GraphQL endpoint documentation](https://docs.marklogic.com/REST/POST/v1/rows/graphql) for 
+information on parameters for that endpoint.
