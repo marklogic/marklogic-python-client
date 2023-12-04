@@ -1,0 +1,32 @@
+plugins {
+    id "net.saliman.properties" version "1.5.2"
+    id "com.marklogic.ml-gradle" version "4.6.0"
+}
+
+repositories {
+	mavenCentral()
+	maven { url "https://developer.marklogic.com/maven2/" }
+}
+
+configurations {
+	mlcp
+}
+
+dependencies {
+	mlcp 'com.marklogic:mlcp:11.0.3'
+}
+
+task importEmails(type: com.marklogic.gradle.task.MlcpTask) {
+    description = "Loads the Enron email dataset; don't use yet, doesn't have docs for it."
+	classpath = configurations.mlcp
+    port = 8003
+	command = "IMPORT"
+    input_file_path = "/opt/emails/maildir"
+    document_type = "text"
+	output_collections = "enron,abc"
+	output_permissions = "rest-reader,read,rest-writer,update"
+	output_uri_replace = ".*emails,'/enron'"
+    output_uri_suffix = "txt"
+    transform_module = "/enron.xqy"
+    transform_namespace = "org:example"
+}

@@ -1,0 +1,9 @@
+{
+    "user-name": "langchain-user",
+    "password": "password",
+    "role": [
+        "rest-reader",
+        "rest-writer",
+        "qconsole-user"
+    ]
+}
