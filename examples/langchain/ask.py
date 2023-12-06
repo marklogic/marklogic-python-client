@@ -1,9 +1,8 @@
 # Based on example at
 # https://python.langchain.com/docs/use_cases/question_answering.
 
-import getpass
-import os
 import sys
+from dotenv import load_dotenv
 from langchain import hub
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import StrOutputParser
@@ -26,7 +25,7 @@ retriever.max_results = int(sys.argv[3]) if len(sys.argv) > 3 else 10
 if len(sys.argv) > 4:
     retriever.query_type = sys.argv[4]
 
-os.environ["OPENAI_API_KEY"] = getpass.getpass("OpenAI API key: ")
+load_dotenv()
 
 prompt = hub.pull("rlm/rag-prompt")
 llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
