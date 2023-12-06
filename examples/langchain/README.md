@@ -25,6 +25,10 @@ Then run the following Python program to load text data into two different colle
 
     python load_data.py
 
+Create a ".env" file to hold your OpenAI API key and supply it to the python application.
+
+    echo "OPENAI_API_KEY=<your key here>" > .env
+
 Then run the following to ask a question with the results augmented via the `marklogic_retriever.py` module in this
 project; you will be prompted for an OpenAI API key when you run this, which you can type or paste in:
 
