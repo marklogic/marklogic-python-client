@@ -89,6 +89,75 @@ class RowManager:
         if tx:
             params["txid"] = tx.id
 
+        return self.__send_request(
+            path, format, headers, data, params, return_response, graphql, **kwargs
+        )
+
+    def update(
+        self,
+        dsl: str = None,
+        format: str = "json",
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
+    ):
+        """
+        Sends an update query to an endpoint at the MarkLogic rows service defined at
+        https://docs.marklogic.com/REST/client/row-management. Note that this feature
+        requires the use of MarkLogic version 11.2 or later.
+
+        For more information about Optic Update and using the Optic DSL,
+        see https://docs.marklogic.com/guide/app-dev/OpticAPI.
+        TODO - add links for Optic Update.
+
+        :param dsl: an Optic DSL query
+        :param tx: optional REST transaction in which to service this request.
+        :param return_response: boolean specifying if the entire original response
+        object should be returned (True) or if only the data should be returned (False)
+        upon a success (2xx) response. Note that if the status code of the response is
+        not 2xx, then the entire response is always returned.
+        """
+        path = "v1/rows/update"
+        headers = kwargs.pop("headers", {})
+        data = None
+        request_info = self.__get_request_info(dsl, plan=None, sql=None, sparql=None)
+        data = request_info["data"]
+        headers["Content-Type"] = request_info["content-type"]
+        if format:
+            value = RowManager.__accept_switch.get(format)
+            if value is None:
+                msg = f"Invalid value for 'format' argument: {format}; "
+                msg += "must be one of 'json', 'xml', 'csv', or 'json-seq'."
+                raise ValueError(msg)
+            else:
+                headers["Accept"] = value
+
+        params = kwargs.pop("params", {})
+        if tx:
+            params["txid"] = tx.id
+
+        return self.__send_request(
+            path,
+            format,
+            headers,
+            data,
+            params,
+            return_response,
+            graphql=False,
+            **kwargs,
+        )
+
+    def __send_request(
+        self,
+        path,
+        format,
+        headers,
+        data,
+        params,
+        return_response,
+        graphql=False,
+        **kwargs,
+    ):
         response = self._session.post(
             path, headers=headers, data=data, params=params, **kwargs
         )
