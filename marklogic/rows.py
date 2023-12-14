@@ -67,6 +67,61 @@ class RowManager:
         not 2xx, then the entire response is always returned.
         """
         path = "v1/rows/graphql" if graphql else "v1/rows"
+        return self.__send_request(
+            path,
+            dsl,
+            plan,
+            sql,
+            sparql,
+            graphql,
+            format,
+            tx,
+            return_response,
+            **kwargs,
+        )
+
+    def update(
+        self,
+        dsl: str = None,
+        format: str = "json",
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
+    ):
+        """
+        Sends an update query to an endpoint at the MarkLogic rows service defined at
+        https://docs.marklogic.com/REST/client/row-management. Note that this feature
+        requires the use of MarkLogic version 11.2 or later.
+
+        For more information about Optic Update and using the Optic DSL,
+        see https://docs.marklogic.com/guide/app-dev/OpticAPI.
+        TODO - add links for Optic Update.
+
+        :param dsl: an Optic DSL query
+        :param tx: optional REST transaction in which to service this request.
+        :param return_response: boolean specifying if the entire original response
+        object should be returned (True) or if only the data should be returned (False)
+        upon a success (2xx) response. Note that if the status code of the response is
+        not 2xx, then the entire response is always returned.
+        """
+        path = "v1/rows/update"
+        return self.__send_request(
+            path, dsl, None, None, None, None, format, tx, return_response, **kwargs
+        )
+
+    def __send_request(
+        self,
+        path: str = None,
+        dsl: str = None,
+        plan: dict = None,
+        sql: str = None,
+        sparql: str = None,
+        graphql: str = None,
+        format: str = "json",
+        tx: Transaction = None,
+        return_response: bool = False,
+        **kwargs,
+    ):
         headers = kwargs.pop("headers", {})
         data = None
         if graphql:
