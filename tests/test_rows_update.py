@@ -1,4 +1,32 @@
-from marklogic.documents import DefaultMetadata, Document
+import json
+from marklogic.documents import Document
+
+
+def test_update_dsl_fromDocDescriptors(client):
+    doc_uri = "/doc1.json"
+    doc_contents = {"hello": "doc1"}
+    doc_permissions = [
+        {"capability": "read", "roleName": "python-tester"},
+        {"capability": "update", "roleName": "python-tester"},
+    ]
+    update_query_fromDocDescriptors = f"""
+        const docDescriptors = [
+            {{ 
+                uri:"{doc_uri}",
+                doc:'{json.dumps(doc_contents)}',
+                permissions: {json.dumps(doc_permissions)}
+            }}
+        ];
+        op.fromDocDescriptors(docDescriptors).write()
+    """
+    response = client.rows.update(update_query_fromDocDescriptors, return_response=True)
+    assert 200 == response.status_code
+
+    docs = client.documents.read([doc_uri])
+    doc1 = next(doc for doc in docs if doc.uri == doc_uri)
+    assert "application/json" == doc1.content_type
+    assert doc1.version_id is not None
+    assert doc_contents == doc1.content
 
 
 def test_update_dsl_remove(admin_client):
