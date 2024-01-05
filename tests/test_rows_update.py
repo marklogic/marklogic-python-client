@@ -3,7 +3,7 @@ from marklogic.documents import Document
 
 
 def test_update_dsl_fromDocDescriptors(client):
-    doc_uri = "/doc1.json"
+    doc_uri = "/temp/doc1.json"
     doc_contents = {"hello": "doc1"}
     doc_permissions = [
         {"capability": "read", "roleName": "python-tester"},
@@ -11,7 +11,7 @@ def test_update_dsl_fromDocDescriptors(client):
     ]
     update_query_fromDocDescriptors = f"""
         const docDescriptors = [
-            {{ 
+            {{
                 uri:"{doc_uri}",
                 doc:'{json.dumps(doc_contents)}',
                 permissions: {json.dumps(doc_permissions)}
