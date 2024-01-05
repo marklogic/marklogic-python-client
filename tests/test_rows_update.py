@@ -58,3 +58,17 @@ def test_update_dsl_wrong_path(admin_client):
         "Optic Update need to be run as update transaction"
         in response.content.decode("utf-8")
     )
+
+
+def test_update_via_serialized_plan(client):
+    DEFAULT_PERMS = {"python-tester": ["read", "update"]}
+    DOC_URI = "/temp/doc2.json"
+    client.documents.write([Document(DOC_URI, {"doc": 1}, permissions=DEFAULT_PERMS)])
+    docs = client.documents.read(DOC_URI)
+    assert 1 == len(docs)
+
+    plan = open("tests/remove-uri-plan.json", "rb")
+    response = client.rows.update(plan=plan, return_response=True)
+    assert 200 == response.status_code
+    docs = client.documents.read(DOC_URI)
+    assert 0 == len(docs)

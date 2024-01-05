@@ -1,0 +1,31 @@
+{
+  "$optic" : {
+    "ns" : "op",
+    "fn" : "operators",
+    "args" : [ {
+      "ns" : "op",
+      "fn" : "from-doc-uris",
+      "args" : [ {
+        "ns" : "cts",
+        "fn" : "document-query",
+        "args" : [ [ {
+          "ns" : "xs",
+          "fn" : "string",
+          "args" : [ "/temp/doc2.json" ]
+        } ] ]
+      }, null ]
+    }, {
+      "ns" : "op",
+      "fn" : "remove",
+      "args" : [ {
+        "ns" : "op",
+        "fn" : "col",
+        "args" : [ {
+          "ns" : "xs",
+          "fn" : "string",
+          "args" : [ "uri" ]
+        } ]
+      } ]
+    } ]
+  }
+}
