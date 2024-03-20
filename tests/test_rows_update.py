@@ -53,9 +53,9 @@ def test_update_dsl_wrong_path(admin_client):
 
     update_query_remove = 'op.fromDocUris("' + DOC_URI + '").lockForUpdate().remove()'
     response = admin_client.rows.query(update_query_remove, return_response=True)
-    assert 400 == response.status_code
+    assert 500 == response.status_code
     assert (
-        "Optic Update need to be run as update transaction"
+        "Optic plans that perform updates must be sent via HTTP POST to the v1/rows/update endpoint."
         in response.content.decode("utf-8")
     )
 
