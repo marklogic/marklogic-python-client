@@ -11,6 +11,14 @@ writing multiple documents with metadata via a multipart HTTP request. The MarkL
 simplifies the use of this endpoint via the `client.documents.write` method and the `Document`
 class. 
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
+## Setup
+
 The examples below all assume that you have created a new MarkLogic user named "python-user" as described in the 
 [setup guide](../example-setup.md). In addition, each of the examples below requires the following `Client` instance to be created 
 first:

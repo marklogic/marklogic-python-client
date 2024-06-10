@@ -1,5 +1,6 @@
 import json
 from collections import OrderedDict
+from email.message import Message
 from typing import Union
 
 from marklogic.transactions import Transaction
@@ -262,23 +263,29 @@ def _extract_values_from_header(part) -> dict:
     Returns a dict containing values about the document content or metadata.
     """
     encoding = part.encoding
-    disposition = part.headers["Content-Disposition".encode(encoding)].decode(encoding)
-    disposition_values = {}
-    for item in disposition.split(";"):
-        tokens = item.split("=")
-        # The first item will be "attachment" and can be ignored.
-        if len(tokens) == 2:
-            disposition_values[tokens[0].strip()] = tokens[1]
+    disposition = part.headers["Content-Disposition".encode(encoding)].decode(
+        encoding
+    )
 
     content_type = None
     if part.headers.get("Content-Type".encode(encoding)):
-        content_type = part.headers["Content-Type".encode(encoding)].decode(encoding)
+        content_type = part.headers["Content-Type".encode(encoding)].decode(
+            encoding
+        )
 
-    uri = disposition_values["filename"]
-    if uri.startswith('"'):
-        uri = uri[1:]
-    if uri.endswith('"'):
-        uri = uri[:-1]
+    content_disposition_header = part.headers[
+        "Content-Disposition".encode(encoding)
+    ].decode(encoding)
+    msg = Message()
+    msg["content-disposition"] = content_disposition_header
+    uri = msg.get_filename()
+
+    disposition_values = {}
+    for item in disposition.replace(uri, "").split(";"):
+        tokens = item.split("=")
+        key = tokens[0].strip()
+        if key in ["category", "versionId"]:
+            disposition_values[key] = tokens[1]
 
     return {
         "uri": uri,

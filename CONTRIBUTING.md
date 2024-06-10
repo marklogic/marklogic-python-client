@@ -6,7 +6,16 @@ To try this out locally:
 - `source .venv/bin/activate` to use that virtual environment.
 - `poetry install` to install project dependencies.
 
-VSCode is recommended for development. You can try [these instructions](https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-1) 
+VSCode is recommended for development.
+- For formatting, the project uses the [Black](https://github.com/psf/black) code formatter, and the
+[Black Formatter VSCode extension](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter)
+is recommended.
+- For linting, the project uses the [Flake8](https://flake8.pycqa.org/en/latest/) linter and the
+[Flake8 extension](https://marketplace.visualstudio.com/items?itemName=ms-python.flake8) is recommended.
+These tools are included in the project by pyproject.toml and the settings are in .vscode/settings.json.
+
+You can also get additional information at
+[these instructions](https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-1) 
 for getting setup in VSCode with linting and formatting enabled.
 
 ## Running the tests
@@ -66,6 +75,18 @@ And this initializes a client that connects to the OOTB App-Services app server,
 project's documentation:
 
     python -i shell/docs.py
+
+
+## Testing updates in a different local project
+If you are using this in another project and making changes for it, use the following command to make the
+changes to this local project immediately reflected in a dependent project:
+```poetry add <local-path-to-this-project>/marklogic-python-client/```
+ 
+Using this method will allow you to very easily test changes to this project, in a different local project.
+
+Keep in mind that you probably do not want to check that version of the pyproject.toml file into version
+control since it is only useful locally.
+
 
 ## Testing the documentation locally
 

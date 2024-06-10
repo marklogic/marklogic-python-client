@@ -13,6 +13,14 @@ via a `Transaction` class that is also a
 thereby allowing it to handle committing or rolling back the transaction without any user 
 involvement.
 
+## Table of contents
+{: .no_toc .text-delta }
+
+- TOC
+{:toc}
+
+## Using a transaction
+
 The following example demonstrates writing documents via multiple calls to MarkLogic, 
 all within the same REST API transaction; the example depends on first following the 
 instructions in the [setup guide](example-setup.md):

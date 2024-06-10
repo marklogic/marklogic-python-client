@@ -42,13 +42,13 @@ def test_base_url_used_instead_of_host(cloud_config):
 def test_invalid_host():
     with pytest.raises(ValueError) as err:
         Client(
-            host="marklogic.com",
+            host="localhost",
+            port=8031,
+            verify=False,
             cloud_api_key="doesnt-matter-for-this-test",
             base_path=DEFAULT_BASE_PATH,
         )
-    assert str(err.value).startswith(
-        "Unable to generate token; status code: 403; cause: "
-    )
+    assert "Unable to generate token; status code: 401; cause: " in str(err.value)
 
 
 def test_invalid_api_key(cloud_config):
