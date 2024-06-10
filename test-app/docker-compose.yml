@@ -1,0 +1,18 @@
+version: '3.8'
+name: marklogic_python
+
+services:
+
+  marklogic:
+    image: "marklogicdb/marklogic-db:11.2.0-centos-1.1.2"
+    platform: linux/amd64
+    environment:
+      - INSTALL_CONVERTERS=true
+      - MARKLOGIC_INIT=true
+      - MARKLOGIC_ADMIN_USERNAME=admin
+      - MARKLOGIC_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/marklogic/logs:/var/opt/MarkLogic/Logs
+    ports:
+      - "8000-8002:8000-8002"
+      - "8030-8031:8030-8031"
