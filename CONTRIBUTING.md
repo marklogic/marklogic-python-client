@@ -76,6 +76,18 @@ project's documentation:
 
     python -i shell/docs.py
 
+
+## Testing updates in a different local project
+If you are using this in another project and making changes for it, use the following command to make the
+changes to this local project immediately reflected in a dependent project:
+```poetry add <local-path-to-this-project>/marklogic-python-client/```
+ 
+Using this method will allow you to very easily test changes to this project, in a different local project.
+
+Keep in mind that you probably do not want to check that version of the pyproject.toml file into version
+control since it is only useful locally.
+
+
 ## Testing the documentation locally
 
 The docs for this project are stored in the `./docs` directory as a set of Markdown files. These are published via

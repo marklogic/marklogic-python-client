@@ -84,10 +84,11 @@ def test_search_with_original_response(client: Client):
 
 
 def test_collection(client: Client):
+
     docs = client.documents.search(
         categories=["content", "collections"], collections=["search-test"]
     )
-    assert len(docs) == 2
+    assert len(docs) == 4
 
     doc1 = next(doc for doc in docs if doc.uri == "/doc1.json")
     assert doc1.content is not None
@@ -101,6 +102,18 @@ def test_collection(client: Client):
     assert "test-data" in doc1.collections
     assert "search-test" in doc1.collections
 
+    doc3 = next(doc for doc in docs if doc.uri == "/doc2;copy.xml")
+    assert doc3.content is not None
+    assert len(doc3.collections) == 2
+    assert "test-data" in doc3.collections
+    assert "search-test" in doc3.collections
+
+    doc4 = next(doc for doc in docs if doc.uri == "/doc2=copy.xml")
+    assert doc4.content is not None
+    assert len(doc4.collections) == 2
+    assert "test-data" in doc4.collections
+    assert "search-test" in doc4.collections
+
 
 def test_not_rest_user(not_rest_user_client: Client):
     response: Response = not_rest_user_client.documents.search(q="hello")
@@ -109,3 +122,27 @@ def test_not_rest_user(not_rest_user_client: Client):
     ), """The user does not have the rest-reader privilege, so MarkLogic is expected
     to return a 403. And the documents.search method is then expected to return the
     Response so that the user has access to everything in it."""
+
+
+def test_version_id(client: Client):
+    equalSignEtag = (
+        client.get("v1/documents?uri=/doc2=copy.xml")
+        .headers["ETag"]
+        .replace('"', "")
+    )
+
+    semicolonEtag = (
+        client.get("v1/documents?uri=/doc2;copy.xml")
+        .headers["ETag"]
+        .replace('"', "")
+    )
+
+    docs = client.documents.search(
+        categories=["content", "collections"], collections=["search-test"]
+    )
+
+    doc1 = next(doc for doc in docs if doc.uri == "/doc2=copy.xml")
+    assert doc1.version_id == equalSignEtag
+
+    doc2 = next(doc for doc in docs if doc.uri == "/doc2;copy.xml")
+    assert doc2.version_id == semicolonEtag
