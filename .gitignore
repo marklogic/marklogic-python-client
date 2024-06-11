@@ -7,3 +7,4 @@ venv
 .idea
 
 .DS_Store
+publishing_markLogic_client.token
