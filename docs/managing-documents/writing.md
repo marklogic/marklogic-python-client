@@ -175,3 +175,21 @@ the response headers as well.
 The `status_code` and `text` fields in the `Response` object will typically be of the most interest when 
 debugging a problem. Please see 
 [Response API documentation](https://docs.python-requests.org/en/latest/api/#requests.Response) for complete information on what's available in this object.
+
+
+## Optic Update
+
+Beginning with version 1.2.0 of this client and MarkLogic Server 11.2, the client permits you to send an Optic
+update query to MarkLogic via the new `client.rows.update` method. The first parameter is the Optic update query
+(either DSL or serialized) and the second parameter specifies if the entire original response object should be
+returned (`True`) or if only the data should be returned (`False`) upon a success (2xx) response. Note that if
+the status code of the response is not 2xx, then the entire response is always returned.
+
+Example:
+```
+plan = 'op.fromDocDescriptors({uri: "/helloworld.json", doc: {"hello": "world"}, collections: [ "mydocs" ] })'
+response = client.rows.update(plan, return_response=True)
+```
+
+For more information about the Optic Update feature, please see
+https://docs.marklogic.com/guide/release-notes/en/new-features-in-marklogic-11-2/optic-update-generally-available.html
