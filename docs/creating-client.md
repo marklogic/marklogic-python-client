@@ -101,7 +101,8 @@ client = Client(host='example.marklogic.cloud', cloud_api_key='some-key-value', 
 
 Configuring SSL connections is the same as 
 [documented for the `requests` library](https://requests.readthedocs.io/en/latest/user/advanced/#ssl-cert-verification). 
-As a convience, the `Client` constructor includes a `verify` argument so that it does not need to be configured on the 
+As a convience, the `Client` constructor includes a `verify` argument for specifying a client certificate 
+so that it does not need to be configured on the 
 `Client` instance after it's been constructed nor on every request:
 
 ```
