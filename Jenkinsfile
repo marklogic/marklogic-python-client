@@ -14,7 +14,7 @@ pipeline{
             agent {label 'devExpLinuxPool'}
             steps{
                 script{
-                    copyRPM 'Latest','11.4'
+                    copyRPM 'Latest','11'
                     setUpML '$WORKSPACE/xdmp/src/Mark*.rpm'
                     sh label:'deploy project', script: '''#!/bin/bash
                         export JAVA_HOME=$JAVA_HOME_DIR
