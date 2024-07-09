@@ -17,7 +17,7 @@ pytest = "^7.4.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
-black = "^23.3.0"
+black = ">=23.3,<25.0"
 ipykernel = "^6.29.3"
 
 [build-system]
