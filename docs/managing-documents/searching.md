@@ -55,6 +55,12 @@ assert len(docs) == 1
 The search string in the example corresponds to the `q` argument, which is the first argument in the method and thus
 does not need to be named. 
 
+With a search string, you may wish to reference a set of 
+[MarkLogic search options](https://docs.marklogic.com/guide/search-dev/query-options) as well. You can configure a set
+of options via the [MarkLogic REST API](https://docs.marklogic.com/guide/rest-dev/search#id_48838) and then refer to 
+them by name via the `options` argument. For example, if your options are named `myOptions`, you would 
+include `options=myOptions` as an argument to `client.documents.search`. 
+
 ## Searching via a complex query
 
 More complex queries can be submitted via the `query` parameter. The value of this parameter must be one of the
