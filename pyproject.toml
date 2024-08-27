@@ -9,14 +9,14 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-requests = "^2.31.0"
+requests = "^2.32.3"
 requests_toolbelt = "^1.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"
+flake8 = "^7.1.1"
 black = ">=23.3,<25.0"
 ipykernel = "^6.29.3"
 
