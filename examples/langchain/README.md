@@ -43,28 +43,36 @@ into two different collections in the `langchain-test-content` database:
 
     python load_data.py
 
-Create a ".env" file to hold your OpenAI API key:
-
-    echo "OPENAI_API_KEY=<your key here>" > .env
+Create a ".env" file to hold your AzureOpenAI environment values. It should look
+something like this.
+```
+OPENAI_API_VERSION=2023-12-01-preview
+AZURE_OPENAI_ENDPOINT=<Your Azure OpenAI Endpoint>
+AZURE_OPENAI_API_KEY=<Your Azure OpenAI API Key>
+AZURE_LLM_DEPLOYMENT_NAME=gpt-test1-gpt-35-turbo
+AZURE_LLM_DEPLOYMENT_MODEL=gpt-35-turbo
+```
 
 # Testing the retriever
 
+## Testing using a retriever with a basic query
+
 You are now ready to test the example retriever. Run the following to ask a question with the 
 results augmented via the `marklogic_retriever.py` module in this project; you will be 
-prompted for an OpenAI API key when you run this, which you can type or paste in:
+prompted for an AzureOpenAI API key when you run this, which you can type or paste in:
 
-    python ask.py "What is task decomposition?" posts
+    python ask_similar_query.py "What is task decomposition?" posts
 
 The retriever uses a [cts.similarQuery](https://docs.marklogic.com/cts.similarQuery) to select from the documents 
 loaded via `load_data.py`. It defaults to a page length of 10. You can change this by providing a command line
 argument - e.g.:
 
-    python ask.py "What is task decomposition?" posts 15
+    python ask_similar_query.py "What is task decomposition?" posts 15
 
 Example of a question for the "sotu" (State of the Union speech) collection:
 
-    python ask.py "What are economic sanctions?" sotu 20
+    python ask_similar_query.py "What are economic sanctions?" sotu 20
 
 To use a word query instead of a similar query, along with a set of drop words, specify "word" as the 4th argument:
 
-    python ask.py "What are economic sanctions?" sotu 20 word
+    python ask_similar_query.py "What are economic sanctions?" sotu 20 word

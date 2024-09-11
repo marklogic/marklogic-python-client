@@ -10,20 +10,32 @@ which uses a `create` method instead of __init__.
 """
 
 
-class MarkLogicRetriever(BaseRetriever):
+class MarkLogicSimilarQueryRetriever(BaseRetriever):
 
     client: Client
     max_results: int = 10
     collections: List[str] = []
     query_type: str = "similar"
-    drop_words = ["did", "the", "about", "a", "an", "is", "are", "what", 
-                  "say", "do", "was", "that"]
+    drop_words = [
+        "did",
+        "the",
+        "about",
+        "a",
+        "an",
+        "is",
+        "are",
+        "what",
+        "say",
+        "do",
+        "was",
+        "that",
+    ]
 
     @classmethod
     def create(cls, client: Client):
         return cls(client=client)
 
-    def _get_relevant_documents(self, query: str) -> List[Document]:    
+    def _get_relevant_documents(self, query: str) -> List[Document]:
         words = []
         for word in query.split():
             if word.lower() not in self.drop_words:
@@ -43,7 +55,7 @@ class MarkLogicRetriever(BaseRetriever):
         results = self.client.documents.search(
             query=cts_query,
             page_length=self.max_results,
-            collections=self.collections
+            collections=self.collections,
         )
         print(f"Count of matching MarkLogic documents: {len(results)}")
         return map(lambda doc: Document(page_content=doc.content), results)
