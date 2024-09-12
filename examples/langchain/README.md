@@ -57,15 +57,15 @@ AZURE_LLM_DEPLOYMENT_MODEL=gpt-35-turbo
 
 ## Testing using a retriever with a basic query
 
-You are now ready to test the example retriever. Run the following to ask a question with the 
-results augmented via the `marklogic_retriever.py` module in this project; you will be 
-prompted for an AzureOpenAI API key when you run this, which you can type or paste in:
+You are now ready to test the example retriever. Run the following to ask a question
+with the results augmented via the `marklogic_similar_query_retriever.py` module in this
+project:
 
     python ask_similar_query.py "What is task decomposition?" posts
 
-The retriever uses a [cts.similarQuery](https://docs.marklogic.com/cts.similarQuery) to select from the documents 
-loaded via `load_data.py`. It defaults to a page length of 10. You can change this by providing a command line
-argument - e.g.:
+The retriever uses a [cts.similarQuery](https://docs.marklogic.com/cts.similarQuery) to
+select from the documents loaded via `load_data.py`. It defaults to a page length of 10.
+You can change this by providing a command line argument - e.g.:
 
     python ask_similar_query.py "What is task decomposition?" posts 15
 
@@ -73,6 +73,20 @@ Example of a question for the "sotu" (State of the Union speech) collection:
 
     python ask_similar_query.py "What are economic sanctions?" sotu 20
 
-To use a word query instead of a similar query, along with a set of drop words, specify "word" as the 4th argument:
+To use a word query instead of a similar query, along with a set of drop words, specify
+"word" as the 4th argument:
 
     python ask_similar_query.py "What are economic sanctions?" sotu 20 word
+
+## Testing using a retriever with a contextual query
+
+There may be times when your langchain application needs to use both a question and a
+structured query during the document retrieval process. To see an example of this, run
+the following to ask a question. That question is combined with a hard-coded structured
+query using the `marklogic_contextual_query_retriever.py` module in this project.
+
+    python ask_contextual_query.py "What is task decomposition?" posts
+
+This retriever builds a term-query using words from the question. Then the term-query is
+added to the structured query and the merged query is used to select from the documents 
+loaded via `load_data.py`.
