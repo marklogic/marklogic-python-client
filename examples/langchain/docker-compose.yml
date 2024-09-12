@@ -1,5 +1,5 @@
 version: '3.8'
-name: marklogic_langchain
+name: marklogic_python_example_langchain
 
 services:
 
