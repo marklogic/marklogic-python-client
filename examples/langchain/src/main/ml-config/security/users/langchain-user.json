@@ -4,6 +4,7 @@
     "role": [
         "rest-reader",
         "rest-writer",
-        "qconsole-user"
+        "qconsole-user",
+        "langchain-eval-role"
     ]
 }

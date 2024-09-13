@@ -17,34 +17,42 @@ loader = WebBaseLoader(
 )
 docs = loader.load()
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000, chunk_overlap=100
+)
 splits = text_splitter.split_documents(docs)
 
 client = Client("http://localhost:8003", digest=("langchain-user", "password"))
 
-marklogic_docs = [
-    DefaultMetadata(collections="posts")
-]
+marklogic_docs = [DefaultMetadata(collections="posts")]
 for split in splits:
-    doc = Document(None, split.page_content, extension=".txt", directory="/post/")
+    doc = Document(
+        None, split.page_content, extension=".txt", directory="/post/"
+    )
     marklogic_docs.append(doc)
 
 client.documents.write(marklogic_docs)
-print(f"Number of documents written to collection 'posts': {len(marklogic_docs)-1}")
+print(
+    f"Number of documents written to collection 'posts': {len(marklogic_docs)-1}"
+)
 
 loader = WebBaseLoader(
-    web_paths=("https://raw.githubusercontent.com/langchain-ai/langchain/master/docs/docs/modules/state_of_the_union.txt",)
+    web_paths=(["https://www.whitehouse.gov/state-of-the-union-2022/"])
 )
 docs = loader.load()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000, chunk_overlap=100
+)
 splits = text_splitter.split_documents(docs)
 
-marklogic_docs = [
-    DefaultMetadata(collections="sotu")
-]
+marklogic_docs = [DefaultMetadata(collections="sotu")]
 for split in splits:
-    doc = Document(None, split.page_content, extension=".txt", directory="/sotu/")
+    doc = Document(
+        None, split.page_content, extension=".txt", directory="/sotu/"
+    )
     marklogic_docs.append(doc)
 
 client.documents.write(marklogic_docs)
-print(f"Number of documents written to collection 'sotu': {len(marklogic_docs)-1}")
+print(
+    f"Number of documents written to collection 'sotu': {len(marklogic_docs)-1}"
+)

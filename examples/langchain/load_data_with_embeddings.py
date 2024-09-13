@@ -50,9 +50,7 @@ print(
 )
 
 loader = WebBaseLoader(
-    web_paths=(
-        "https://raw.githubusercontent.com/langchain-ai/langchain/master/docs/docs/modules/state_of_the_union.txt",
-    )
+    web_paths=(["https://www.whitehouse.gov/state-of-the-union-2022/"])
 )
 docs = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(

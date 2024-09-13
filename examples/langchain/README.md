@@ -104,7 +104,9 @@ loaded via `load_data.py`.
 ### MarkLogic 12EA Setup
 
 To try out this functionality out, you will need acces to an instance of MarkLogic 12
-(currently internal or Early Access only). You may use docker 
+(currently internal or Early Access only).
+<TODO>Add info to get ML12</TODO>
+You may use docker 
 [docker-compose](https://docs.docker.com/compose/) to instantiate a new MarkLogic
 instance with port 8003 available (you can use your own MarkLogic instance too, just be
 sure that port 8003 is available):
@@ -147,3 +149,18 @@ into different collections.
 ```
 python load_data_with_embeddings.py
 ```
+
+### Running the Vector Query
+
+You are now ready to test the example vector retriever. Run the following to ask a
+question with the results augmented via the `marklogic_vector_query_retriever.py` module
+in this project:
+
+    python ask_vector_query.py "What is task decomposition?" posts_with_embeddings
+
+This retriever searches MarkLogic for candidate documents, and defaults to
+using the new score-bm25 scoring method in MarkLogic 12EA. If preferred, you can adjust
+this to one of the other scoring methods. After retrieving candidate documents based on
+the CTS search, the retriever uses the new vector functionality to sort the documents
+based on cosine similarity to the user question, and then returns the top N documents
+for the retriever to package up.
