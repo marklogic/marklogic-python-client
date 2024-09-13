@@ -1,0 +1,35 @@
+{
+  "template": {
+    "context": "/",
+    "collections": [
+      "posts_with_embeddings"
+    ],
+    "rows": [
+      {
+        "schemaName": "demo",
+        "viewName": "posts",
+        "columns": [
+          {
+            "name": "uri",
+            "scalarType": "string",
+            "val": "xdmp:node-uri(.)"
+          },
+          {
+            "name": "embedding",
+            "scalarType": "vector",
+            "val": "vec:vector(embedding)",
+            "dimension": "1536",
+            "invalidValues": "reject",
+            "nullable": true
+          },
+          {
+            "name": "text",
+            "scalarType": "string",
+            "val": "text",
+            "nullable": true
+          }
+        ]
+      }
+    ]
+  }
+}

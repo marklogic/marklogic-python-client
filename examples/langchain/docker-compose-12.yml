@@ -1,0 +1,17 @@
+version: '3.8'
+name: marklogic_python_example_langchain-12
+
+services:
+
+  marklogic:
+    image: "ml-docker-db-dev-tierpoint.bed-artifactory.bedford.progress.com/marklogic/marklogic-server-ubi:12.0.nightly-ubi-2.0.1"
+    platform: linux/amd64
+    environment:
+      - MARKLOGIC_INIT=true
+      - MARKLOGIC_ADMIN_USERNAME=admin
+      - MARKLOGIC_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/marklogic/logs:/var/opt/MarkLogic/Logs
+    ports:
+      - "8000-8003:8000-8003"
+

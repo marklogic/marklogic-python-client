@@ -26,10 +26,14 @@ is available):
 
     docker-compose up -d --build
 
+## Deploy With Gradle
+
 Then deploy a small REST API application to MarkLogic, which includes a basic non-admin MarkLogic user 
 named `langchain-user`:
 
     ./gradlew -i mlDeploy
+
+## Install Python Libraries
 
 Next, create a new Python virtual environment - [pyenv](https://github.com/pyenv/pyenv) is recommended for this - 
 and install the 
@@ -38,10 +42,14 @@ along with the MarkLogic Python Client:
 
     pip install -U langchain langchain_openai langchain-community langchainhub openai chromadb bs4 marklogic_python_client
 
+## Load Sample Data
+
 Then run the following Python program to load text data from the langchain quickstart guide 
 into two different collections in the `langchain-test-content` database:
 
     python load_data.py
+
+## Create Python Environment File
 
 Create a ".env" file to hold your AzureOpenAI environment values. It should look
 something like this.
@@ -90,3 +98,52 @@ query using the `marklogic_contextual_query_retriever.py` module in this project
 This retriever builds a term-query using words from the question. Then the term-query is
 added to the structured query and the merged query is used to select from the documents 
 loaded via `load_data.py`.
+
+## Testing using MarkLogic 12EA Vector Search
+
+### MarkLogic 12EA Setup
+
+To try out this functionality out, you will need acces to an instance of MarkLogic 12
+(currently internal or Early Access only). You may use docker 
+[docker-compose](https://docs.docker.com/compose/) to instantiate a new MarkLogic
+instance with port 8003 available (you can use your own MarkLogic instance too, just be
+sure that port 8003 is available):
+
+    docker-compose -f docker-compose-12.yml up -d --build
+
+### Deploy With Gradle
+
+You will also need to deploy the application. However, for this example, you will need
+to include an additional switch on the command line to deploy a TDE schema that takes
+advantage of the vector capabilities in MarkLogic 12.
+
+    ./gradlew -i mlDeploy -PmlSchemasPath=src/main/ml-schemas-12
+
+### Install Python Libraries
+
+As above, if you have not yet installed the Python libraries, install this with pip:
+```
+pip install -U langchain langchain_openai langchain-community langchainhub openai chromadb bs4 marklogic_python_client
+```
+
+### Create Python Environment File
+The Python script for this example also generates LLM embeddings and includes them in
+the documents stored in MarkLogic. In order to generate the embeddings, you'll need to
+add the following environment variables (with your values) to the .env file created
+above.
+
+```
+AZURE_EMBEDDING_DEPLOYMENT_NAME=text-test-embedding-ada-002
+AZURE_EMBEDDING_DEPLOYMENT_MODEL=text-embedding-ada-002
+```
+
+### Load Sample Data
+
+Then run the following Python program to load text data from the langchain quickstart
+guide into two different collections in the `langchain-test-content` database. Note that
+this script is different than the one in the earlier setup section and loads the data
+into different collections.
+
+```
+python load_data_with_embeddings.py
+```
