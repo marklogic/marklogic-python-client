@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class MarkLogicCloudAuth(AuthBase):
     """
-    Handles authenticating with MarkLogic Cloud.
+    Handles authenticating with Progress Data Cloud.
     See https://requests.readthedocs.io/en/latest/user/advanced/#custom-authentication
     for more information on custom authentication classes in requests.
 
