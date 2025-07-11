@@ -1,9 +1,9 @@
-name: marklogic_python
+name: docker-tests-marklogic_python
 
 services:
 
   marklogic:
-    image: "progressofficial/marklogic-db:11.3.0-ubi"
+    image: "ml-docker-db-dev-tierpoint.bed-artifactory.bedford.progress.com/marklogic/marklogic-server-ubi-rootless:latest-12"
     platform: linux/amd64
     environment:
       - INSTALL_CONVERTERS=true
