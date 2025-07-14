@@ -1,6 +1,6 @@
 import math
 import ast
-from marklogic.vectors import VectorUtil
+from marklogic.vectors import base64_encode, base64_decode
 from marklogic import Client
 
 VECTOR = [3.14, 1.59, 2.65]
@@ -9,17 +9,17 @@ ACCEPTABLE_DELTA = 0.0001
 
 
 def test_encode_and_decode_with_python():
-    encoded = VectorUtil.base64_encode(VECTOR)
+    encoded = base64_encode(VECTOR)
     assert encoded == EXPECTED_BASE64
 
-    decoded = VectorUtil.base64_decode(encoded)
+    decoded = base64_decode(encoded)
     assert len(decoded) == len(VECTOR)
     for a, b in zip(decoded, VECTOR):
         assert abs(a - b) < ACCEPTABLE_DELTA
 
 
 def test_decode_known_base64():
-    decoded = VectorUtil.base64_decode(EXPECTED_BASE64)
+    decoded = base64_decode(EXPECTED_BASE64)
     assert len(decoded) == len(VECTOR)
     for a, b in zip(decoded, VECTOR):
         assert abs(a - b) < ACCEPTABLE_DELTA
@@ -29,7 +29,7 @@ def test_encode_and_decode_with_server(client: Client):
     """
     Encode a vector in Python, decode it on the MarkLogic server, and check the result.
     """
-    encoded = VectorUtil.base64_encode(VECTOR)
+    encoded = base64_encode(VECTOR)
     assert encoded == EXPECTED_BASE64
 
     # Use MarkLogic's eval endpoint to decode the vector on the server
@@ -49,7 +49,7 @@ def test_encode_with_server_and_decode_with_python(client: Client):
     encoded = client.eval(xquery=xquery)[0]
     assert encoded == EXPECTED_BASE64
 
-    decoded = VectorUtil.base64_decode(encoded)
+    decoded = base64_decode(encoded)
     assert len(decoded) == len(VECTOR)
     for a, b in zip(decoded, VECTOR):
         assert math.isclose(a, b, abs_tol=ACCEPTABLE_DELTA)
