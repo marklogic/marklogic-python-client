@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 import json
 from collections import OrderedDict
 from email.message import Message
@@ -263,15 +266,11 @@ def _extract_values_from_header(part) -> dict:
     Returns a dict containing values about the document content or metadata.
     """
     encoding = part.encoding
-    disposition = part.headers["Content-Disposition".encode(encoding)].decode(
-        encoding
-    )
+    disposition = part.headers["Content-Disposition".encode(encoding)].decode(encoding)
 
     content_type = None
     if part.headers.get("Content-Type".encode(encoding)):
-        content_type = part.headers["Content-Type".encode(encoding)].decode(
-            encoding
-        )
+        content_type = part.headers["Content-Type".encode(encoding)].decode(encoding)
 
     content_disposition_header = part.headers[
         "Content-Disposition".encode(encoding)

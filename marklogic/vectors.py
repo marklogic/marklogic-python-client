@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 """
 Supports encoding and decoding vectors using the same approach as the vec:base64-encode and vec:base64-decode
 functions supported by the MarkLogic server.
@@ -26,9 +29,7 @@ def base64_decode(encoded_vector: str) -> List[float]:
     """
     buffer = base64.b64decode(encoded_vector)
     if len(buffer) < 8:
-        raise ValueError(
-            "Buffer is too short to contain version and dimensions."
-        )
+        raise ValueError("Buffer is too short to contain version and dimensions.")
     version, dimensions = struct.unpack("<ii", buffer[:8])
     if version != 0:
         raise ValueError(f"Unsupported vector version: {version}")
@@ -37,7 +38,5 @@ def base64_decode(encoded_vector: str) -> List[float]:
         raise ValueError(
             f"Buffer is too short for the specified dimensions: expected {expected_length}, got {len(buffer)}"
         )
-    floats = struct.unpack(
-        "<" + "f" * dimensions, buffer[8 : 8 + 4 * dimensions]
-    )
+    floats = struct.unpack("<" + "f" * dimensions, buffer[8 : 8 + 4 * dimensions])
     return list(floats)
