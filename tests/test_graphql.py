@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 def test_graphql(client):
     data = client.rows.query(
         graphql="query musicianQuery { test_musician { lastName firstName dob } }"

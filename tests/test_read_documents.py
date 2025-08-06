@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 from requests import Response
 
 from marklogic import Client
@@ -139,7 +142,7 @@ def test_read_with_basic_client(basic_client: Client):
 
 def test_read_with_original_response(basic_client: Client):
     response = basic_client.documents.read("/doc1.json", return_response=True)
-    assert b'--ML_BOUNDARY' in response.content
+    assert b"--ML_BOUNDARY" in response.content
     assert b'filename="/doc1.json"' in response.content
     assert b'{"hello":"world"}' in response.content
 
