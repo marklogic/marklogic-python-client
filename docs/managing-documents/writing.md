@@ -164,6 +164,33 @@ Starting in the 1.1.0 release, you can reference a
 [REST API transaction](https://docs.marklogic.com/REST/client/transaction-management) via the `tx` 
 argument. See [the guide on transactions](../transactions.md) for further information.
 
+## Writing documents with vector embeddings
+
+When working with vector embeddings in MarkLogic 12, you can significantly reduce document size and improve
+indexing performance by encoding vectors as base64 strings before writing them to the database. As of 
+version 1.3.0, the MarkLogic Python client provides utilities that are compatible with MarkLogic's 
+built-in `vec:base64-encode` and `vec:base64-decode` functions.
+
+The following example shows how to use the `base64_encode` function in the `marklogic.vectors` module. 
+The module also contains a `base64_decode` function that can be used after reading a document to obtain
+the original vector array.
+
+```python
+from marklogic.documents import Document
+from marklogic.vectors import base64_encode
+
+embedding = [0.1, 0.2, 0.3, 0.4, 0.5]  # Example embedding
+encoded_vector = base64_encode(embedding)
+
+document_content = {
+    "title": "Sample Document",
+    "content": "This is a document with an embedding",
+    "embedding": encoded_vector  # Store as encoded string
+}
+
+doc = Document("/documents/sample-doc.json", document_content, permissions=default_perms)
+client.documents.write(doc)
+```
 
 ## Error handling
 
