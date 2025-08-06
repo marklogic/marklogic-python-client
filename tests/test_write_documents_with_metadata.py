@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 from marklogic import Client
 from marklogic.documents import DefaultMetadata, Document
 

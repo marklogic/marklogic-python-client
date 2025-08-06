@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 def test_verify_false(ssl_client):
     """
     The certificate verification in requests is fairly picky; while it's

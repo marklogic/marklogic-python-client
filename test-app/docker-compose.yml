@@ -1,9 +1,9 @@
-name: marklogic_python
+name: docker-tests-marklogic_python
 
 services:
 
   marklogic:
-    image: "progressofficial/marklogic-db:11.3.0-ubi"
+    image: "${MARKLOGIC_IMAGE}"
     platform: linux/amd64
     environment:
       - INSTALL_CONVERTERS=true
@@ -11,7 +11,7 @@ services:
       - MARKLOGIC_ADMIN_USERNAME=admin
       - MARKLOGIC_ADMIN_PASSWORD=admin
     volumes:
-      - ./docker/marklogic/logs:/var/opt/MarkLogic/Logs
+      - ${MARKLOGIC_LOGS_VOLUME}:/var/opt/MarkLogic/Logs
     ports:
       - "8000-8002:8000-8002"
       - "8030-8031:8030-8031"

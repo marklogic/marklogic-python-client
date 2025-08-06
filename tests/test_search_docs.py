@@ -1,3 +1,6 @@
+# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
+
 import json
 
 from requests import Response
@@ -126,15 +129,11 @@ def test_not_rest_user(not_rest_user_client: Client):
 
 def test_version_id(client: Client):
     equalSignEtag = (
-        client.get("v1/documents?uri=/doc2=copy.xml")
-        .headers["ETag"]
-        .replace('"', "")
+        client.get("v1/documents?uri=/doc2=copy.xml").headers["ETag"].replace('"', "")
     )
 
     semicolonEtag = (
-        client.get("v1/documents?uri=/doc2;copy.xml")
-        .headers["ETag"]
-        .replace('"', "")
+        client.get("v1/documents?uri=/doc2;copy.xml").headers["ETag"].replace('"', "")
     )
 
     docs = client.documents.search(
