@@ -20,6 +20,9 @@ flake8 = "^7.1.1"
 black = ">=23.3,<25.0"
 ipykernel = "^6.30.1"
 
+# Forcing latest version to eliminate CVEs; transitive dependency of ipykernel.
+jupyter-core = "^5.8.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
