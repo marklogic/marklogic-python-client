@@ -12,6 +12,9 @@ python = "^3.9"
 requests = "^2.32.5"
 requests_toolbelt = "^1.0.0"
 
+# Forcing version to eliminate CVEs; transitive dependency of requests.
+urllib3 = "^2.6.3"
+
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
 
