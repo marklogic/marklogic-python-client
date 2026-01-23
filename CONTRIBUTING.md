@@ -22,7 +22,7 @@ for getting setup in VSCode with linting and formatting enabled.
 
 Before running any tests, first deploy the test application:
 
-- Use Java 8 or higher
+- Use Java 17
 - `cd test-app`
 - Create a file named `gradle-local.properties` and add `mlPassword=` to it, with the value of the property being
 your admin user's password.
