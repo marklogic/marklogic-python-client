@@ -32,8 +32,7 @@ pipeline{
                 export GRADLE_USER_HOME=$WORKSPACE/$GRADLE_DIR
                 export PATH=$GRADLE_USER_HOME:$JAVA_HOME/bin:$PATH
                 cd marklogic-python-client/test-app
-                echo "Waiting for MarkLogic server to initialize."
-                sleep 60s
+                ./gradlew -i mlWaitTillReady
                 ./gradlew -i mlDeploy -PmlPassword=admin
               '''
               // 'set -e' causes the script to fail if any command fails.

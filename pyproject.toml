@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "marklogic-python-client"
-version = "1.3.0"
+version = "1.3.1"
 description = "Python client for MarkLogic, built on the requests library"
 authors = ["MarkLogic <general@developer.marklogic.com>"]
 readme = "README.md"
@@ -9,8 +9,11 @@ license = "Apache 2.0"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-requests = "^2.32.4"
+requests = "^2.32.5"
 requests_toolbelt = "^1.0.0"
+
+# Forcing version to eliminate CVEs; transitive dependency of requests.
+urllib3 = "^2.6.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
@@ -19,6 +22,9 @@ pytest = "^7.4.0"
 flake8 = "^7.1.1"
 black = ">=23.3,<25.0"
 ipykernel = "^6.30.1"
+
+# Forcing latest version to eliminate CVEs; transitive dependency of ipykernel.
+jupyter-core = "^5.8.1"
 
 [build-system]
 requires = ["poetry-core"]
