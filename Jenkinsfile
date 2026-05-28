@@ -7,7 +7,7 @@ pipeline{
     environment{
         JAVA_HOME_DIR="/home/builder/java/jdk-17.0.2"
         GRADLE_DIR   =".gradle"
-        PYTHON313_DIR="/home/builder/python/Python-3.13.7/bin"
+        PYTHON313_BIN="/home/builder/python/Python-3.13.7/bin"
     }
 
     options {
@@ -40,13 +40,13 @@ pipeline{
               sh label:'Run tests', script: '''#!/bin/bash
                 set -e
                 cd marklogic-python-client
-                export PATH=$PYTHON313_DIR:$PATH;
-                python3.13 --version;
-                python3.13 -m venv .venv;
-                source .venv/bin/activate;
-                python --version;
-                python -m pip install poetry;
-                poetry install;
+                export PATH="${PYTHON313_BIN}:${PATH}"
+                python3.13 --version
+                python3.13 -m venv .venv
+                source .venv/bin/activate
+                python --version
+                python -m pip install poetry
+                poetry install
                 pytest --junitxml=TestReport.xml || true
               '''
               junit 'marklogic-python-client/TestReport.xml'
