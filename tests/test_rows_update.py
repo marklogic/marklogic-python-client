@@ -16,7 +16,7 @@ def test_update_dsl_fromDocDescriptors(client):
         const docDescriptors = [
             {{
                 uri:"{doc_uri}",
-                doc:'{json.dumps(doc_contents)}',
+                doc:{json.dumps(doc_contents)},
                 permissions: {json.dumps(doc_permissions)}
             }}
         ];
