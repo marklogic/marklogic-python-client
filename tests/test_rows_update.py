@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 import json
@@ -16,7 +16,7 @@ def test_update_dsl_fromDocDescriptors(client):
         const docDescriptors = [
             {{
                 uri:"{doc_uri}",
-                doc:'{json.dumps(doc_contents)}',
+                doc:{json.dumps(doc_contents)},
                 permissions: {json.dumps(doc_permissions)}
             }}
         ];
