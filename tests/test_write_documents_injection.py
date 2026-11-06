@@ -47,6 +47,7 @@ def test_uri_with_control_chars_is_rejected(uri):
         {"version_id": "1\r\nX-Evil: y"},
         {"version_id": '"1";extract=properties'},
         {"version_id": '"1'},
+        {"version_id": '"123\\"'},
         {"temporal_document": "/x.json;category=metadata"},
         {"temporal_document": '/x.json"'},
     ],

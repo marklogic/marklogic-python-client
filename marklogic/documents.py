@@ -38,10 +38,12 @@ def _disposition_param(name: str, value) -> str:
     # versionId is commonly taken from an ETag header, which is quoted.
     if name == "versionId" and len(value) >= 2 and value[0] == value[-1] == '"':
         to_check = value[1:-1]
-    if _UNSAFE_PARAM_CHARS.search(to_check):
+    if (name == "versionId" and "\\" in to_check) or _UNSAFE_PARAM_CHARS.search(
+        to_check
+    ):
         raise ValueError(
             f"Invalid value for '{name}'; must not contain control characters, "
-            "';' or '\"'."
+            "';', '\\' or '\"'."
         )
     return f";{name}={value}"
 
