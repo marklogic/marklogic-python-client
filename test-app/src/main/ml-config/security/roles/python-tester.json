@@ -15,6 +15,11 @@
             "kind": "execute"
         },
         {
+            "privilege-name": "any-uri",
+            "action": "http://marklogic.com/xdmp/privileges/any-uri",
+            "kind": "execute"
+        },
+        {
             "privilege-name": "xdbc:eval",
             "action": "http://marklogic.com/xdmp/privileges/xdbc-eval",
             "kind": "execute"
