@@ -1,7 +1,8 @@
-# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 import json
+import re
 from collections import OrderedDict
 from email.message import Message
 from typing import Union
@@ -16,6 +17,33 @@ from urllib3.filepost import encode_multipart_formdata
 Defines classes to simplify usage of the documents REST endpoint defined at
 https://docs.marklogic.com/REST/client/management.
 """
+
+_CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f]")
+_UNSAFE_PARAM_CHARS = re.compile(r'[\x00-\x1f\x7f;"]')
+_REPAIR_VALUES = ("full", "none")
+
+
+def _validate_uri(uri: str) -> None:
+    if uri is not None and _CONTROL_CHARS.search(str(uri)):
+        raise ValueError("Document URI must not contain control characters.")
+
+
+def _disposition_param(name: str, value) -> str:
+    """
+    Returns a Content-Disposition parameter, rejecting values that could inject
+    additional parameters or header lines.
+    """
+    value = str(value)
+    to_check = value
+    # versionId is commonly taken from an ETag header, which is quoted.
+    if name == "versionId" and len(value) >= 2 and value[0] == value[-1] == '"':
+        to_check = value[1:-1]
+    if _UNSAFE_PARAM_CHARS.search(to_check):
+        raise ValueError(
+            f"Invalid value for '{name}'; must not contain control characters, "
+            "';' or '\"'."
+        )
+    return f";{name}={value}"
 
 
 class Metadata:
@@ -173,6 +201,7 @@ class Document(Metadata):
         """
         if self.content is None:
             return None
+        _validate_uri(self.uri)
         data = self.content
         if type(data) is dict:
             data = json.dumps(data)
@@ -192,11 +221,13 @@ class Document(Metadata):
         if len(metadata.keys()) == 0:
             return None
 
+        _validate_uri(self.uri)
+        # urllib3 appends an escaped filename based on the URI.
         field = RequestField(
             name=self.uri, data=json.dumps(metadata), filename=self.uri
         )
         field.make_multipart(
-            content_disposition=f"attachment; filename={self.uri}; category=metadata",
+            content_disposition="attachment; category=metadata",
             content_type="application/json",
         )
         return field
@@ -212,21 +243,27 @@ class Document(Metadata):
         if not self.uri:
             disposition = "inline"
             if self.extension:
-                disposition = f"{disposition};extension={self.extension}"
+                disposition += _disposition_param("extension", self.extension)
             if self.directory:
-                disposition = f"{disposition};directory={self.directory}"
+                disposition += _disposition_param("directory", self.directory)
 
         if self.repair:
-            disposition = f"{disposition};repair={self.repair}"
+            if self.repair not in _REPAIR_VALUES:
+                raise ValueError(
+                    "Invalid value for 'repair'; must be 'full' or 'none'."
+                )
+            disposition += _disposition_param("repair", self.repair)
 
         if self.extract:
-            disposition = f"{disposition};extract={self.extract}"
+            disposition += _disposition_param("extract", self.extract)
 
         if self.version_id:
-            disposition = f"{disposition};versionId={self.version_id}"
+            disposition += _disposition_param("versionId", self.version_id)
 
         if self.temporal_document:
-            disposition = f"{disposition};temporal-document={self.temporal_document}"
+            disposition += _disposition_param(
+                "temporal-document", self.temporal_document
+            )
 
         return disposition
 
