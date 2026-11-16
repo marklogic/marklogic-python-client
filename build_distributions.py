@@ -1,3 +1,5 @@
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+
 import argparse
 import shutil
 import subprocess
