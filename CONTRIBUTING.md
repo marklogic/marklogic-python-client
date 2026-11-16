@@ -18,6 +18,17 @@ You can also get additional information at
 [these instructions](https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-1) 
 for getting setup in VSCode with linting and formatting enabled.
 
+## Building the distribution files
+
+From the project root, run:
+
+    python build_distributions.py
+
+This creates the wheel, source distribution, and standalone SPDX SBOM in `dist/`. To write them to a different directory,
+pass it with `--output`:
+
+    python build_distributions.py --output <directory>
+
 ## Running the tests
 
 Before running any tests, first deploy the test application:
