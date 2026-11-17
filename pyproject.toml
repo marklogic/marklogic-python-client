@@ -5,6 +5,7 @@ description = "Python client for MarkLogic, built on the requests library"
 authors = ["MarkLogic <general@developer.marklogic.com>"]
 readme = "README.md"
 packages = [{include = "marklogic"}]
+include = [{ path = "sbom.spdx.json", format = ["sdist", "wheel"] }]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
