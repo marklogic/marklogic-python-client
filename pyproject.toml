@@ -18,7 +18,7 @@ pytest = "^9.0.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
-black = ">=23.3,<25.0"
+black = "26.10.1"
 ipykernel = "^6.30.1"
 
 # Forcing latest version to eliminate CVEs; transitive dependency of ipykernel.
