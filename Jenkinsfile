@@ -78,17 +78,28 @@ pipeline{
                 '''
                 archiveArtifacts artifacts: 'marklogic-python-client/dist/marklogic_python_client-*.whl, marklogic-python-client/dist/marklogic_python_client-*.tar.gz', fingerprint: true, followSymlinks: false
                 script {
+                  def packageVersion = sh(
+                    label: 'read-package-version',
+                    script: '''#!/bin/bash
+                      set -e
+                      export PATH="${PYTHON313_BIN}:${PATH}"
+                      cd marklogic-python-client
+                      python3.13 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["tool"]["poetry"]["version"])'
+                    ''',
+                    returnStdout: true
+                  ).trim()
+                  def artifactoryTarget = "ml-generic-dev-tierpoint/marklogic-python-client/${packageVersion}/"
                   def artifactory = Artifactory.newServer(url: 'https://bed-artifactory.bedford.progress.com:443/artifactory/', credentialsId: 'builder-credentials-artifactory')
                   def uploadSpec = """{
                     "files": [
                       {
                         "pattern": "${WORKSPACE}/marklogic-python-client/dist/marklogic_python_client-*.whl",
-                        "target": "ml-generic-dev-tierpoint/marklogic-python-client/",
+                        "target": "${artifactoryTarget}",
                         "props": "build.number=${BUILD_NUMBER};build.name=${JOB_NAME}"
                       },
                       {
                         "pattern": "${WORKSPACE}/marklogic-python-client/dist/marklogic_python_client-*.tar.gz",
-                        "target": "ml-generic-dev-tierpoint/marklogic-python-client/",
+                        "target": "${artifactoryTarget}",
                         "props": "build.number=${BUILD_NUMBER};build.name=${JOB_NAME}"
                       }
                     ]
