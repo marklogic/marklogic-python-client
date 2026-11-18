@@ -79,6 +79,18 @@ class Client(requests.Session):
         request.url = request_url
         return super(Client, self).prepare_request(request, *args, **kwargs)
 
+    def should_strip_auth(self, old_url, new_url):
+        return not is_same_origin(old_url, new_url)
+
+    def rebuild_auth(self, prepared_request, response):
+        if not is_same_origin(prepared_request.url, self.base_url):
+            prepared_request.hooks["response"] = [
+                hook
+                for hook in prepared_request.hooks.get("response", [])
+                if getattr(hook, "__self__", None) is not self.auth
+            ]
+        return super(Client, self).rebuild_auth(prepared_request, response)
+
     @property
     def documents(self):
         if not hasattr(self, "_documents"):

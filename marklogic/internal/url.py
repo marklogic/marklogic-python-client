@@ -2,6 +2,8 @@
 
 
 from urllib.parse import urlsplit
+from requests.exceptions import RequestException
+from requests.models import PreparedRequest
 
 
 def is_same_origin(url: str, base_url: str) -> bool:
@@ -9,11 +11,15 @@ def is_same_origin(url: str, base_url: str) -> bool:
         return False
 
     try:
-        url_parts = urlsplit(url)
-        base_parts = urlsplit(base_url)
+        url_request = PreparedRequest()
+        url_request.prepare_url(url, None)
+        base_request = PreparedRequest()
+        base_request.prepare_url(base_url, None)
+        url_parts = urlsplit(url_request.url)
+        base_parts = urlsplit(base_request.url)
         url_port = url_parts.port
         base_port = base_parts.port
-    except ValueError:
+    except (RequestException, ValueError):
         return False
 
     url_scheme = url_parts.scheme.lower()

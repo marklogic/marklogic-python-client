@@ -36,6 +36,28 @@ def test_prepare_request_accepts_same_origin_absolute_url():
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("authorization", ["Basic dXNlcjpwYXNz", "Bearer token"])
+def test_rebuild_auth_strips_credentials_on_cross_origin_redirect(authorization):
+    client = Client("http://marklogic.example", auth=("user", "password"))
+    original_request = Request(
+        "GET",
+        "http://marklogic.example/resource",
+        headers={"Authorization": authorization},
+    ).prepare()
+    redirected_request = Request(
+        "GET",
+        "https://marklogic.example/resource",
+        headers={"Authorization": authorization},
+    ).prepare()
+    response = Response()
+    response.request = original_request
+
+    client.rebuild_auth(redirected_request, response)
+
+    assert "Authorization" not in redirected_request.headers
+
+
+@pytest.mark.unit
 def test_cloud_auth_does_not_retry_401_from_another_origin():
     session = Session()
     token_response = Mock(status_code=200)
@@ -121,6 +143,67 @@ def test_cloud_auth_does_not_send_token_to_cross_origin_redirect_target():
 
 
 @pytest.mark.unit
+def test_digest_auth_does_not_answer_foreign_origin_challenge_after_redirect():
+    class ChallengeHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.server.authorization_headers.append(
+                self.headers.get("Authorization")
+            )
+            self.send_response(401)
+            self.send_header(
+                "WWW-Authenticate",
+                'Digest realm="attacker", nonce="nonce", qop="auth"',
+            )
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, format, *args):
+            pass
+
+    class RedirectHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(302)
+            self.send_header("Location", self.server.redirect_url)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, format, *args):
+            pass
+
+    challenge_server = ThreadingHTTPServer(
+        ("127.0.0.1", 0), ChallengeHandler
+    )
+    challenge_server.authorization_headers = []
+    redirect_server = ThreadingHTTPServer(("127.0.0.1", 0), RedirectHandler)
+    redirect_server.redirect_url = (
+        f"http://127.0.0.1:{challenge_server.server_port}/challenge"
+    )
+    threads = [
+        Thread(target=server.serve_forever, daemon=True)
+        for server in (challenge_server, redirect_server)
+    ]
+    for thread in threads:
+        thread.start()
+
+    client = Client(
+        f"http://127.0.0.1:{redirect_server.server_port}",
+        digest=("user", "password"),
+    )
+    try:
+        response = client.get("/redirect")
+    finally:
+        client.close()
+        for server in (redirect_server, challenge_server):
+            server.shutdown()
+            server.server_close()
+        for thread in threads:
+            thread.join()
+
+    assert response.status_code == 401
+    assert challenge_server.authorization_headers == [None]
+
+
+@pytest.mark.unit
 def test_cloud_auth_still_retries_401_from_configured_origin():
     session = Session()
     token_response = Mock(status_code=200)
@@ -145,3 +228,31 @@ def test_cloud_auth_still_retries_401_from_configured_origin():
     assert post.call_count == 2
     send.assert_called_once()
     assert response.request.headers["Authorization"] == "Bearer renewed-token"
+
+
+@pytest.mark.unit
+def test_cloud_auth_renews_for_idna_normalized_same_origin():
+    session = Session()
+    token_response = Mock(status_code=200)
+    token_response.json.side_effect = [
+        {"access_token": "initial-token"},
+        {"access_token": "renewed-token"},
+    ]
+    response = Response()
+    response.status_code = 401
+    response.request = Request(
+        "GET", "https://xn--bcher-kva.example/resource"
+    ).prepare()
+    retry_response = Response()
+    retry_response.status_code = 200
+
+    with patch(
+        "marklogic.cloud_auth.requests.post", return_value=token_response
+    ) as post:
+        auth = MarkLogicCloudAuth(session, "https://bücher.example", "api-key")
+        with patch.object(session, "send", return_value=retry_response) as send:
+            retried_response = auth._renew_token_if_necessary(response)
+
+    assert retried_response is retry_response
+    assert post.call_count == 2
+    send.assert_called_once()
