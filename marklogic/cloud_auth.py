@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 import logging
@@ -6,6 +6,8 @@ import requests
 from requests import Response, Session, Request
 from requests.auth import AuthBase
 from urllib.parse import urljoin
+
+from marklogic.internal.url import is_same_origin
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +70,11 @@ class MarkLogicCloudAuth(AuthBase):
         self._access_token = response.json()["access_token"]
 
     def _renew_token_if_necessary(self, response: Response, *args, **kwargs):
-        if response.status_code == 401 and not self.resent_request_on_401:
+        request_url = response.request.url if response.request else None
+        is_unauthorized = response.status_code == 401
+        is_first_retry = not self.resent_request_on_401
+        matches_base_url = is_same_origin(request_url, self._base_url)
+        if is_unauthorized and is_first_retry and matches_base_url:
             logger.debug("Received 401; will generate new token and try request again")
             self.resent_request_on_401 = True
             self._generate_token()
