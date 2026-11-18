@@ -47,12 +47,12 @@ pipeline{
                 python --version
                 python -m pip install poetry
                 poetry install
-                pytest --junitxml=TestReport.xml || true
+                pytest --junitxml=TestReport.xml
               '''
-              junit 'marklogic-python-client/TestReport.xml'
             }
             post{
               always{
+                junit testResults: 'marklogic-python-client/TestReport.xml', allowEmptyResults: true
                 updateWorkspacePermissions()
                 sh label:'mlcleanup', script: '''#!/bin/bash
                   cd marklogic-python-client/test-app
@@ -60,6 +60,58 @@ pipeline{
                 '''
                 cleanupDocker()
               }
+            }
+        }
+        stage('publish'){
+            agent {label 'devExpLinuxPool'}
+            when {
+                branch 'develop'
+            }
+            steps{
+                sh label:'build-distributions', script: '''#!/bin/bash
+                  set -e
+                  export PATH="${PYTHON313_BIN}:${PATH}"
+                  cd marklogic-python-client
+                  rm -f dist/marklogic_python_client-*.whl dist/marklogic_python_client-*.tar.gz
+                  python3.13 -m pip install poetry
+                  poetry build
+                '''
+                archiveArtifacts artifacts: 'marklogic-python-client/dist/marklogic_python_client-*.whl, marklogic-python-client/dist/marklogic_python_client-*.tar.gz', fingerprint: true, followSymlinks: false
+                script {
+                  def packageVersion = sh(
+                    label: 'read-package-version',
+                    script: '''#!/bin/bash
+                      set -e
+                      export PATH="${PYTHON313_BIN}:${PATH}"
+                      cd marklogic-python-client
+                      python3.13 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["tool"]["poetry"]["version"])'
+                    ''',
+                    returnStdout: true
+                  ).trim()
+                  def artifactoryTarget = "ml-generic-dev-tierpoint/marklogic-python-client/${packageVersion}/"
+                  def artifactory = Artifactory.newServer(url: 'https://bed-artifactory.bedford.progress.com:443/artifactory/', credentialsId: 'builder-credentials-artifactory')
+                  def uploadSpec = """{
+                    "files": [
+                      {
+                        "pattern": "${WORKSPACE}/marklogic-python-client/dist/marklogic_python_client-*.whl",
+                        "target": "${artifactoryTarget}",
+                        "props": "build.number=${BUILD_NUMBER};build.name=${JOB_NAME}"
+                      },
+                      {
+                        "pattern": "${WORKSPACE}/marklogic-python-client/dist/marklogic_python_client-*.tar.gz",
+                        "target": "${artifactoryTarget}",
+                        "props": "build.number=${BUILD_NUMBER};build.name=${JOB_NAME}"
+                      }
+                    ]
+                  }"""
+                  artifactory.upload(uploadSpec)
+                  echo "${uploadSpec}"
+                }
+            }
+            post{
+                always{
+                    updateWorkspacePermissions()
+                }
             }
         }
     }
