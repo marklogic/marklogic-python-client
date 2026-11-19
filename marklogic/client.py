@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 import json
@@ -7,6 +7,7 @@ import requests
 from marklogic.cloud_auth import MarkLogicCloudAuth
 from marklogic.documents import DocumentManager
 from marklogic.internal.eval import process_multipart_mixed_response
+from marklogic.internal.url import is_same_origin
 from marklogic.rows import RowManager
 from marklogic.transactions import TransactionManager, Transaction
 from requests.auth import HTTPDigestAuth
@@ -70,8 +71,25 @@ class Client(requests.Session):
         more information on prepared requests. Note that this is invoked after the
         'request' method is invoked.
         """
-        request.url = urljoin(self.base_url, request.url)
+        request_url = urljoin(self.base_url, request.url)
+        if not is_same_origin(request_url, self.base_url):
+            raise ValueError(
+                "Request URL must use the same origin as the configured base_url."
+            )
+        request.url = request_url
         return super(Client, self).prepare_request(request, *args, **kwargs)
+
+    def should_strip_auth(self, old_url, new_url):
+        return not is_same_origin(old_url, new_url)
+
+    def rebuild_auth(self, prepared_request, response):
+        if not is_same_origin(prepared_request.url, self.base_url):
+            prepared_request.hooks["response"] = [
+                hook
+                for hook in prepared_request.hooks.get("response", [])
+                if getattr(hook, "__self__", None) is not self.auth
+            ]
+        return super(Client, self).rebuild_auth(prepared_request, response)
 
     @property
     def documents(self):

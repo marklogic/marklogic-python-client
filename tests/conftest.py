@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+# Copyright (c) 2023-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
 
 import pytest
@@ -58,15 +58,20 @@ def cloud_config():
 
 
 @pytest.fixture(autouse=True)
-def prepare_test_database(admin_client: Client):
+def prepare_test_database(admin_client: Client, request):
     """
     Deletes any documents created by other tests to ensure a 'clean' database before a
     test runs. Does not delete documents in the 'test-data' collection which is intended
     to contain all the documents loaded by the test-app. A user with the 'admin' role
     is used so that temporal documents can be deleted.
     """
-    query = "cts:uris((), (), cts:not-query(cts:collection-query('test-data'))) \
-        ! xdmp:document-delete(.)"
+    if request.node.get_closest_marker("unit"):
+        return
+
+    query = (
+        "cts:uris((), (), cts:not-query(cts:collection-query('test-data'))) "
+        "! xdmp:document-delete(.)"
+    )
     response = admin_client.post(
         "v1/eval",
         headers={"Content-type": "application/x-www-form-urlencoded"},
