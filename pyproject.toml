@@ -9,12 +9,12 @@ include = [{ path = "sbom.spdx.json", format = ["sdist", "wheel"] }]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.13"
 requests = "2.34.2"
 requests_toolbelt = "^1.0.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^9.0.2"
+pytest = "^9.2.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
@@ -23,6 +23,9 @@ ipykernel = "^6.30.1"
 
 # Forcing latest version to eliminate CVEs; transitive dependency of ipykernel.
 jupyter-core = "^5.8.1"
+
+# Forcing latest version to eliminate CVEs; transitive dependency of ipykernel.
+tornado = "^6.6.1"
 
 [build-system]
 requires = ["poetry-core"]
