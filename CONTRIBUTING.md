@@ -1,6 +1,6 @@
 To try this out locally:
 
-- Use Python 3.9 or higher; [pyenv](https://github.com/pyenv/pyenv#installation) is recommended for installing and managing Python versions. 
+- Use Python 3.13 or higher; [pyenv](https://github.com/pyenv/pyenv#installation) is recommended for installing and managing Python versions. 
 - [Install poetry](https://python-poetry.org/docs/)
 - `python -m venv .venv` to [create a virtual environment](https://docs.python.org/3/library/venv.html).
 - `source .venv/bin/activate` to use that virtual environment.
