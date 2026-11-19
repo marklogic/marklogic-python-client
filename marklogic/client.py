@@ -11,7 +11,7 @@ from marklogic.internal.url import is_same_origin
 from marklogic.rows import RowManager
 from marklogic.transactions import TransactionManager, Transaction
 from requests.auth import HTTPDigestAuth
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 
 class Client(requests.Session):
@@ -34,6 +34,10 @@ class Client(requests.Session):
         self.verify = verify
 
         if cloud_api_key:
+            if base_url and urlparse(base_url).scheme.lower() != "https":
+                raise ValueError(
+                    "base_url must use HTTPS when cloud_api_key is provided."
+                )
             port = 443 if port == 0 else port
             scheme = "https"
 

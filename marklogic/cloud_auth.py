@@ -3,13 +3,20 @@
 
 import logging
 import requests
+import warnings
 from requests import Response, Session, Request
 from requests.auth import AuthBase
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from marklogic.internal.url import is_same_origin
 
 logger = logging.getLogger(__name__)
+DEFAULT_TOKEN_REQUEST_TIMEOUT = 30
+
+
+def _no_auth(request: Request) -> Request:
+    """Return requests unchanged so token bootstrap bypasses session auth."""
+    return request
 
 
 class MarkLogicCloudAuth(AuthBase):
@@ -35,6 +42,13 @@ class MarkLogicCloudAuth(AuthBase):
         self._base_url = base_url
         self._api_key = api_key
         self._cloud_token_duration = cloud_token_duration
+        if self._session.verify is False:
+            warnings.warn(
+                "verify=False disables TLS certificate validation for cloud token "
+                "requests and can expose API keys to man-in-the-middle attacks.",
+                UserWarning,
+                stacklevel=2,
+            )
         self._generate_token()
 
         # See https://docs.python-requests.org/en/latest/user/advanced/#event-hooks for
@@ -55,11 +69,14 @@ class MarkLogicCloudAuth(AuthBase):
         if self._cloud_token_duration > 0:
             params["duration"] = self._cloud_token_duration
 
-        response = requests.post(
+        response = Session.request(
+            self._session,
+            "POST",
             urljoin(self._base_url, "/token"),
             data={"grant_type": "apikey", "key": self._api_key},
-            verify=self._session.verify,
+            auth=_no_auth,
             params=params,
+            timeout=DEFAULT_TOKEN_REQUEST_TIMEOUT,
         )
 
         if response.status_code != 200:
@@ -71,6 +88,9 @@ class MarkLogicCloudAuth(AuthBase):
 
     def _renew_token_if_necessary(self, response: Response, *args, **kwargs):
         request_url = response.request.url if response.request else None
+        if request_url and urlparse(request_url).path == "/token":
+            return response
+
         is_unauthorized = response.status_code == 401
         is_first_retry = not self.resent_request_on_401
         matches_base_url = is_same_origin(request_url, self._base_url)
