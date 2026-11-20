@@ -5,6 +5,7 @@ __pycache__
 .venv
 venv
 .idea
+.codesight/
 
 .DS_Store
 publishing_markLogic_client.token
