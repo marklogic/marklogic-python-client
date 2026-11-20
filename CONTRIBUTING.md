@@ -1,10 +1,9 @@
 To try this out locally:
 
 - Use Python 3.13 or higher; [pyenv](https://github.com/pyenv/pyenv#installation) is recommended for installing and managing Python versions. 
-- [Install poetry](https://python-poetry.org/docs/)
-- `python -m venv .venv` to [create a virtual environment](https://docs.python.org/3/library/venv.html).
-- `source .venv/bin/activate` to use that virtual environment.
-- `poetry install` to install project dependencies.
+- Set up the virtual environment and install the project dependencies as described in
+[Local setup with the Harness registry](#local-setup-with-the-harness-registry). Dependencies must not be installed
+from the public PyPI registry.
 
 VSCode is recommended for development.
 - For formatting, the project uses the [Black](https://github.com/psf/black) code formatter, and the
@@ -17,6 +16,65 @@ These tools are included in the project by pyproject.toml and the settings are i
 You can also get additional information at
 [these instructions](https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-1) 
 for getting setup in VSCode with linting and formatting enabled.
+
+## Local setup with the Harness registry
+
+All Python dependencies come from the private Harness Artifact Registry; the public
+PyPI registry is not used. Releases uploaded less than 7 days ago are skipped (supply-chain cool-down), both by Poetry
+(`solver.min-release-age` in `poetry.toml`) and by pip (`uploaded-prior-to` in the virtual environment's pip config).
+
+### One-time setup
+
+1. In Harness, create a personal user token with a scope rule of resource type "Artifact registry", organization
+"MarkLogic", and only the "View Registry" and "Download" permissions.
+2. Copy `.env.example` to `.env` and set `HARNESS_USEREMAIL` (your Progress email) and `HARNESS_TOKEN`. `.env` is
+git-ignored; never commit it or share the token.
+3. From the project root, run the setup script:
+
+        .\scripts\harness-setup.ps1      # Windows PowerShell
+        ./scripts/harness-setup.sh       # macOS / Linux
+
+   The script creates `.venv` if needed, points pip in the virtual environment at Harness only, installs the pinned
+   Poetry version (2.5.1) into the virtual environment, and runs `poetry install`. It is safe to re-run. Delete `.venv`
+   first if it was created before this setup, so that nothing installed from PyPI remains.
+4. Activate the virtual environment (`.\.venv\Scripts\Activate.ps1` or `source .venv/bin/activate`) and run `pytest`.
+
+The virtual environment's pip config (`.venv/pip.ini` or `.venv/pip.conf`) contains your token. It is inside `.venv`,
+which is git-ignored.
+
+### Day-to-day
+
+- Open a new VSCode terminal after changing `.env`; set `POETRY_HTTP_BASIC_HARNESS_*` values for `poetry`. In
+PowerShell, running the setup script again also refreshes them in the current session (a bash script runs in a child
+process, so it cannot). In bash you can load `.env` into the current terminal with `set -a; source .env; set +a`, or set
+the values yourself:
+
+```bash
+$env:POETRY_HTTP_BASIC_HARNESS_USERNAME = <USEREMAIL>   # PowerShell
+$env:POETRY_HTTP_BASIC_HARNESS_PASSWORD = <TOKEN>
+
+export POETRY_HTTP_BASIC_HARNESS_USERNAME=<USEREMAIL>   # bash
+export POETRY_HTTP_BASIC_HARNESS_PASSWORD=<TOKEN>
+```
+
+- Add or update a dependency with `poetry add <package>` or `poetry update <package>`. Poetry skips versions that are
+less than 7 days old.
+- After any change to `poetry.lock`, run the cool-down check and commit `poetry.lock` with the change:
+
+        .\scripts\harness-cooldown-check.ps1      # Windows PowerShell
+        ./scripts/harness-cooldown-check.sh       # macOS / Linux
+
+  If it fails, a locked version is too new; run `poetry lock --regenerate` and check again.
+- If you edit `pyproject.toml` and Poetry reports that `pyproject.toml changed significantly since poetry.lock was last
+generated`, run the setup script with `-Lock` (PowerShell) or `--lock` (bash) once.
+- If your token changes, update `.env` and run the setup script again.
+
+### Troubleshooting
+
+- `No matching distribution found ... (from versions: none)`: pip hides the underlying HTTP error. A `401` means the
+token or email is wrong or expired. A `403` means the token is valid but its scope, or your Harness role, does not allow
+viewing and downloading from the MarkLogic organization's Artifact Registry.
+- The setup script says `HARNESS_USEREMAIL` and `HARNESS_TOKEN` must be set: `.env` is missing or the values are empty.
 
 ## Building the distribution files
 

@@ -1,0 +1,6 @@
+[virtualenvs]
+in-project = true
+
+[solver]
+# Days. Supply-chain cool-down: ignore releases uploaded more recently than this.
+min-release-age = 7

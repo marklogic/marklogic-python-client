@@ -9,3 +9,7 @@ venv
 
 .DS_Store
 publishing_markLogic_client.token
+.env
+
+# Local documents
+local-documents
